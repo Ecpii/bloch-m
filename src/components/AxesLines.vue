@@ -1,31 +1,36 @@
 <script setup>
 import { Line2 } from '@tresjs/cientos'
+const LINE_PROPERTIES = {
+  lineWidth: 2,
+  color: 0x000000,
+  dashed: true,
+  dashScale: 30
+}
 </script>
 
 <template>
-  <!-- <TresAxesHelper /> -->
+  <!--X axis-->
   <Line2
     :points="[
       [-1, 0, 0],
       [1, 0, 0]
     ]"
-    :line-width="10"
-    color="#ff0000"
+    :="LINE_PROPERTIES"
   />
+  <!--Y axis-->
   <Line2
     :points="[
       [0, -1, 0],
       [0, 1, 0]
     ]"
-    :line-width="10"
-    color="#00ff00"
+    :="LINE_PROPERTIES"
   />
+  <!--Z axis-->
   <Line2
     :points="[
       [0, 0, -1],
       [0, 0, 1]
     ]"
-    :line-width="10"
-    color="#0000ff"
+    :="LINE_PROPERTIES"
   />
 </template>
