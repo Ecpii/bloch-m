@@ -1,3 +1,4 @@
+@import './satoshi.css';
 /* semantic color variables for this project */
 :root {
   --text: #020a27;
@@ -35,17 +36,12 @@ body {
   line-height: 1.6;
   font-family:
     Satoshi,
+    Satoshi-Regular,
     Inter,
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
     'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
     sans-serif;
   font-size: 15px;
   text-rendering: optimizeLegibility;
