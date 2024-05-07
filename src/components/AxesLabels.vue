@@ -7,40 +7,64 @@ const { camera, renderer } = useTresContext()
 //   console.log('camera.position', camera.position)
 //   return camera.position
 // })
+const TEXT_PROPERTIES = {
+  font: '/src/assets/fonts/NotoSansMath_Regular.json',
+  height: 0.01,
+  size: 0.1,
+  bevelEnabled: false,
+  center: true,
+  up: [0, 0, 1]
+}
+
+const LABEL_OFFSET = 0.2
 </script>
 
 <template>
   <Text3D
-    text="|0>"
-    font="/src/assets/fonts/Satoshi-Regular.json"
-    :position="[0, 0, 1]"
-    :height="0.01"
-    :size="0.1"
-    :bevel-enabled="false"
-    :center="true"
-    :up="[0, 0, 1]"
-    v-always-look-at="[camera.position.x, camera.position.y, camera.position.z]"
-  >
-    <TresAxesHelper />
-    <TresMeshNormalMaterial />
-  </Text3D>
-  <Text3D
-    text="|+>"
-    font="/src/assets/fonts/Satoshi-Regular.json"
-    :position="[1, 0, 0]"
-    :height="0.01"
-    :size="0.1"
-    :bevel-enabled="false"
+    text="|0⟩"
+    :position="[0, 0, 1 + LABEL_OFFSET]"
+    :="TEXT_PROPERTIES"
+    v-always-look-at="camera.position.clone()"
   >
     <TresMeshNormalMaterial />
   </Text3D>
   <Text3D
-    text="|R>"
-    font="/src/assets/fonts/Satoshi-Regular.json"
-    :position="[0, 1, 0]"
-    :height="0.01"
-    :size="0.1"
-    :bevel-enabled="false"
+    text="|+⟩"
+    :position="[1 + LABEL_OFFSET, 0, 0]"
+    :="TEXT_PROPERTIES"
+    v-always-look-at="camera.position.clone()"
+  >
+    <TresMeshNormalMaterial />
+  </Text3D>
+  <Text3D
+    text="|R⟩"
+    :position="[0, 1 + LABEL_OFFSET, 0]"
+    :="TEXT_PROPERTIES"
+    v-always-look-at="camera.position.clone()"
+  >
+    <TresMeshNormalMaterial />
+  </Text3D>
+  <Text3D
+    text="|1⟩"
+    :position="[0, 0, -1 - LABEL_OFFSET]"
+    :="TEXT_PROPERTIES"
+    v-always-look-at="camera.position.clone()"
+  >
+    <TresMeshNormalMaterial />
+  </Text3D>
+  <Text3D
+    text="|-⟩"
+    :position="[-1 - LABEL_OFFSET, 0, 0]"
+    :="TEXT_PROPERTIES"
+    v-always-look-at="camera.position.clone()"
+  >
+    <TresMeshNormalMaterial />
+  </Text3D>
+  <Text3D
+    text="|L⟩"
+    :position="[0, -1 - LABEL_OFFSET, 0]"
+    :="TEXT_PROPERTIES"
+    v-always-look-at="camera.position.clone()"
   >
     <TresMeshNormalMaterial />
   </Text3D>
