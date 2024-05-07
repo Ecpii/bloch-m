@@ -14,6 +14,7 @@
     "@tresjs/cientos": "^3.9.0",
     "@tresjs/core": "^3.9.0",
     "three": "^0.164.1",
+    "three-spritetext": "^1.8.2",
     "vue": "^3.4.21"
   },
   "devDependencies": {

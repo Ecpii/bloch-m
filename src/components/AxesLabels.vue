@@ -1,73 +1,31 @@
 <script setup>
-import { Text3D } from '@tresjs/cientos'
-import { useTresContext, vAlwaysLookAt } from '@tresjs/core'
-import { computed } from 'vue'
-const { camera, renderer } = useTresContext()
-// const cameraPosition = computed(() => {
-//   console.log('camera.position', camera.position)
-//   return camera.position
-// })
-const TEXT_PROPERTIES = {
-  font: '/src/assets/fonts/NotoSansMath_Regular.json',
-  height: 0.01,
-  size: 0.1,
-  bevelEnabled: false,
-  center: true,
-  up: [0, 0, 1]
-}
-
+import { extend } from '@tresjs/core'
+import SpriteText from 'three-spritetext'
 const LABEL_OFFSET = 0.2
+
+extend({ SpriteText })
+
+const POSITION_LABELS = [
+  { position: [0, 0, 1 + LABEL_OFFSET], text: '|0⟩', key: 'z positive' },
+  { position: [0, 0, -1 - LABEL_OFFSET], text: '|1⟩', key: 'z negative' },
+  { position: [0, 1 + LABEL_OFFSET, 0], text: '|R⟩', key: 'y positive' },
+  { position: [0, -1 - LABEL_OFFSET, 0], text: '|L⟩', key: 'y negative' },
+  { position: [1 + LABEL_OFFSET, 0, 0], text: '|+⟩', key: 'x positive' },
+  { position: [-1 - LABEL_OFFSET, 0, 0], text: '|-⟩', key: 'x negative' }
+]
 </script>
 
 <template>
-  <Text3D
-    text="|0⟩"
-    :position="[0, 0, 1 + LABEL_OFFSET]"
-    :="TEXT_PROPERTIES"
-    v-always-look-at="camera.position.clone()"
+  <TresSpriteText
+    v-for="{ position, text, key } in POSITION_LABELS"
+    :position
+    :text
+    :key
+    text-height="0.1"
+    color="black"
+    font-face="Noto Sans Math"
   >
-    <TresMeshNormalMaterial />
-  </Text3D>
-  <Text3D
-    text="|+⟩"
-    :position="[1 + LABEL_OFFSET, 0, 0]"
-    :="TEXT_PROPERTIES"
-    v-always-look-at="camera.position.clone()"
-  >
-    <TresMeshNormalMaterial />
-  </Text3D>
-  <Text3D
-    text="|R⟩"
-    :position="[0, 1 + LABEL_OFFSET, 0]"
-    :="TEXT_PROPERTIES"
-    v-always-look-at="camera.position.clone()"
-  >
-    <TresMeshNormalMaterial />
-  </Text3D>
-  <Text3D
-    text="|1⟩"
-    :position="[0, 0, -1 - LABEL_OFFSET]"
-    :="TEXT_PROPERTIES"
-    v-always-look-at="camera.position.clone()"
-  >
-    <TresMeshNormalMaterial />
-  </Text3D>
-  <Text3D
-    text="|-⟩"
-    :position="[-1 - LABEL_OFFSET, 0, 0]"
-    :="TEXT_PROPERTIES"
-    v-always-look-at="camera.position.clone()"
-  >
-    <TresMeshNormalMaterial />
-  </Text3D>
-  <Text3D
-    text="|L⟩"
-    :position="[0, -1 - LABEL_OFFSET, 0]"
-    :="TEXT_PROPERTIES"
-    v-always-look-at="camera.position.clone()"
-  >
-    <TresMeshNormalMaterial />
-  </Text3D>
+  </TresSpriteText>
 </template>
 
 <style scoped></style>
