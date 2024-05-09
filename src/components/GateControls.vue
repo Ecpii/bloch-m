@@ -51,11 +51,6 @@ button.reset:hover {
   background: var(--secondary);
 }
 #controls {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
   display: grid;
   grid-template-columns: 4rem 4rem;
   grid-template-rows: repeat(5, 4rem);

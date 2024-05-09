@@ -13,6 +13,7 @@
   "dependencies": {
     "@tresjs/cientos": "^3.9.0",
     "@tresjs/core": "^4.0.0-rc.0",
+    "mathjs": "^12.4.2",
     "three": "^0.164.1",
     "three-spritetext": "^1.8.2",
     "vue": "^3.4.21"
