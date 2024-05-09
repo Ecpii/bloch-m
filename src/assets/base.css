@@ -5,7 +5,9 @@
   --background: #edf2fe;
   --primary: #062184;
   --secondary: #7995f9;
-  --accent: #fff04d;
+  --accent: #cfb805;
+  --purple: #a488af;
+  --green: #a1be7e;
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -35,6 +37,7 @@ body {
     background-color 0.5s;
   line-height: 1.6;
   font-family:
+    'Noto Sans Math',
     Satoshi,
     Satoshi-Regular,
     Inter,
