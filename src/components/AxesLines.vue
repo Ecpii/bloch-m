@@ -1,7 +1,7 @@
 <script setup>
 import { Line2 } from '@tresjs/cientos'
 const LINE_PROPERTIES = {
-  lineWidth: 2,
+  lineWidth: 1,
   color: 0x000000,
   dashed: true,
   dashScale: 30
@@ -33,4 +33,8 @@ const LINE_PROPERTIES = {
     ]"
     :="LINE_PROPERTIES"
   />
+  <TresMesh>
+    <TresTorusGeometry :args="[0.99, 0.005, 8, 64]" />
+    <TresMeshBasicMaterial :color="0x000000" />
+  </TresMesh>
 </template>
