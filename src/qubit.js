@@ -1,4 +1,28 @@
-import { log, i, exp, Complex, mod } from 'mathjs'
+import { Complex, Matrix, complex, mod } from 'mathjs'
+import { Vector3 } from 'three'
+export const GATES = {
+  // Y: new Matrix([
+  //   [0, complex(0, -1)],
+  //   [complex(0, 1), 0]
+  // ]),
+  x: {
+    matrix: new Matrix([
+      [0, 1],
+      [1, 0]
+    ]),
+    axis: [new Vector3(1, 0, 0), new Vector3(-1, 0, 0)],
+    rotation: Math.PI
+  },
+  z: {
+    matrix: new Matrix([
+      [1, 0],
+      [0, -1]
+    ]),
+    // i don't know enough linear algebra to find these eigenvectors programmatically D:
+    axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
+    rotation: Math.PI
+  }
+}
 export function statevectorToProbabilities(statevector) {
   const zeroAmplitude = statevector[0]
   const zeroProbability = zeroAmplitude ** 2

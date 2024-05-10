@@ -1,10 +1,9 @@
 <script setup>
-import { computed, onMounted, shallowRef } from 'vue'
-import { TresCanvas } from '@tresjs/core'
+import { computed, shallowRef, triggerRef } from 'vue'
+import { TresCanvas, useRenderLoop } from '@tresjs/core'
 import { Line2, OrbitControls, Stats } from '@tresjs/cientos'
 import { Vector3 } from 'three'
-import { exp, i } from 'mathjs'
-import { calculateStatevector } from './qubit'
+import { GATES, calculateStatevector } from './qubit'
 
 import GateControls from './components/GateControls.vue'
 import QubitDisplay from './components/QubitDisplay.vue'
@@ -12,7 +11,10 @@ import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
 
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
-const canvasRef = shallowRef(null)
+const sphereRef = shallowRef(null)
+const currentGate = shallowRef(null)
+const ANIMATION_DURATION = 0.2
+const { onLoop } = useRenderLoop()
 
 function handlePointerDown(intersection) {
   console.log('intersection.point', intersection.point)
@@ -25,19 +27,31 @@ function setZeroState() {
 function setOneState() {
   qubitPosition.value = new Vector3(0, 0, -1)
 }
+function handleGate(gate) {
+  currentGate.value = GATES[gate]
+  setTimeout(() => {
+    currentGate.value = null
+  }, ANIMATION_DURATION * 1000)
+}
 
 // const qubitAltitude = computed(() => {
 //   return Math.asin(qubitPosition.value.z)
 // })
 
 const qubitLinePoints = computed(() => {
-  return [[0, 0, 0], qubitPosition.value]
+  return [new Vector3(0, 0, 0), qubitPosition.value]
 })
+const rotationAxis = computed(
+  () => currentGate?.value?.axis ?? [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
+)
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
-
-onMounted(() => {
-  console.log('canvasRef.value', canvasRef.value)
+onLoop(({ delta }) => {
+  if (currentGate.value !== null) {
+    const angle = (delta / ANIMATION_DURATION) * currentGate.value.rotation
+    qubitPosition.value.applyAxisAngle(currentGate.value.axis[0], angle)
+    triggerRef(qubitPosition)
+  }
 })
 </script>
 
@@ -52,11 +66,11 @@ onMounted(() => {
         :far="100"
       />
       <OrbitControls />
-      <!-- <Stats /> -->
+      <Stats />
 
-      <TresMesh :position="[0, 0, 0]" @pointer-down="handlePointerDown">
+      <TresMesh :position="[0, 0, 0]" @pointer-down="handlePointerDown" ref="sphereRef">
         <TresSphereGeometry :args="[1, 64, 32]" />
-        <TresMeshBasicMaterial :color="0x7b97f9" :transparent="true" :opacity="0.4" />
+        <TresMeshBasicMaterial color="#7b97f9" :transparent="true" :opacity="0.2" />
       </TresMesh>
 
       <AxesLines />
@@ -65,12 +79,13 @@ onMounted(() => {
       </Suspense>
 
       <Line2 :points="qubitLinePoints" :line-width="5" />
+      <Line2 :points="rotationAxis" color="#cfb805" :line-width="1" />
     </TresCanvas>
     <div id="qubit-display">
       <QubitDisplay :statevector="qubitStatevector" />
     </div>
     <div id="controls-container">
-      <GateControls @reset-zero="setZeroState" @reset-one="setOneState" />
+      <GateControls @reset-zero="setZeroState" @reset-one="setOneState" @gate="handleGate" />
     </div>
   </div>
 </template>

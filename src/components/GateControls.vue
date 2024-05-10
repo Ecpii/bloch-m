@@ -1,18 +1,18 @@
 <script setup>
-defineEmits(['reset-zero', 'reset-one', 'x', 'y', 'z', 'h', 's', 'sdg', 't', 'tdg'])
+defineEmits(['reset-zero', 'reset-one', 'gate'])
 </script>
 <template>
   <div id="controls">
     <button class="reset" @click="$emit('reset-zero')">|0⟩</button>
     <button class="reset" @click="$emit('reset-one')">|1⟩</button>
-    <button class="pauli" @click="$emit('x')">X</button>
-    <button class="s" @click="$emit('s')">S</button>
-    <button class="pauli" @click="$emit('y')">Y</button>
-    <button class="s" @click="$emit('sdg')">S<sup>†</sup></button>
-    <button class="pauli" @click="$emit('z')">Z</button>
-    <button class="t" @click="$emit('t')">T</button>
-    <button class="h" @click="$emit('h')">H</button>
-    <button class="t" @click="$emit('tdg')">T<sup>†</sup></button>
+    <button class="pauli" @click="$emit('gate', 'x')">X</button>
+    <button class="s" @click="$emit('gate', 's')">S</button>
+    <button class="pauli" @click="$emit('gate', 'y')">Y</button>
+    <button class="s" @click="$emit('gate', 'sdg')">S<sup>†</sup></button>
+    <button class="pauli" @click="$emit('gate', 'z')">Z</button>
+    <button class="t" @click="$emit('gate', 't')">T</button>
+    <button class="h" @click="$emit('gate', 'h')">H</button>
+    <button class="t" @click="$emit('gate', 'tdg')">T<sup>†</sup></button>
   </div>
 </template>
 
