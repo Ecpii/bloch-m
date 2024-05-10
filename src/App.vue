@@ -26,9 +26,9 @@ function setOneState() {
   qubitPosition.value = new Vector3(0, 0, -1)
 }
 
-const qubitAltitude = computed(() => {
-  return Math.asin(qubitPosition.value.z)
-})
+// const qubitAltitude = computed(() => {
+//   return Math.asin(qubitPosition.value.z)
+// })
 
 const qubitLinePoints = computed(() => {
   return [[0, 0, 0], qubitPosition.value]
@@ -46,7 +46,7 @@ onMounted(() => {
     <TresCanvas :alpha="true" ref="canvasRef">
       <TresPerspectiveCamera
         :up="[0, 0, 1]"
-        :position="[3, 1, 1]"
+        :position="[4, 1, 1]"
         :look-at="[0, 0, 0]"
         :near="0.1"
         :far="100"
