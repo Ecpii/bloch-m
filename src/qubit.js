@@ -48,6 +48,38 @@ export const GATES = {
     ),
     axis: [new Vector3(1 / sqrt(2), 0, 1 / sqrt(2)), new Vector3(-1 / sqrt(2), 0, -1 / sqrt(2))],
     rotation: Math.PI
+  },
+  s: {
+    matrix: matrix([
+      [1, 0],
+      [0, complex(0, 1)]
+    ]),
+    axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
+    rotation: Math.PI / 2
+  },
+  sdg: {
+    matrix: matrix([
+      [1, 0],
+      [0, complex(0, -1)]
+    ]),
+    axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
+    rotation: -Math.PI / 2
+  },
+  t: {
+    matrix: matrix([
+      [1, 0],
+      [0, Complex.fromPolar(1, Math.PI / 4)]
+    ]),
+    axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
+    rotation: Math.PI / 4
+  },
+  tdg: {
+    matrix: matrix([
+      [1, 0],
+      [0, Complex.fromPolar(1, -Math.PI / 4)]
+    ]),
+    axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
+    rotation: -Math.PI / 4
   }
 }
 export function statevectorToProbabilities(statevector) {
@@ -96,7 +128,11 @@ export function applyGate(statevector, gate) {
 }
 
 function normalizeStatevector(statevector) {
-  // make statevector such that the zero component is real and one component stores phase
+  /**
+   * Returns statevector with real zero component and phase encoded on one component.
+   * @param statevector math.matrix object of size 2.
+   */
+  //
   const zero = subset(statevector, index(0))
   if (!zero?.isComplex) {
     return statevector
