@@ -1,9 +1,9 @@
 <script setup>
 import { computed, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
-import { Line2, OrbitControls, Stats } from '@tresjs/cientos'
+import { Line2, OrbitControls, Stats, Sphere } from '@tresjs/cientos'
 import { Vector3 } from 'three'
-import { GATES, calculateStatevector } from './qubit'
+import { GATES, calculateStatevector, applyGate, calculateCoordinates } from './qubit'
 
 import GateControls from './components/GateControls.vue'
 import QubitDisplay from './components/QubitDisplay.vue'
@@ -28,24 +28,32 @@ function setOneState() {
   qubitPosition.value = new Vector3(0, 0, -1)
 }
 function handleGate(gate) {
+  // todo: handle when another gate is being applied
+  const originalStatevector = qubitStatevector.value
+  const endStatevector = applyGate(originalStatevector, gate)
   currentGate.value = GATES[gate]
   setTimeout(() => {
     currentGate.value = null
+    // since the animation will be off, we recorrect with the calculated gate matrix on initial statevector
+    setQubitStatevector(endStatevector)
   }, ANIMATION_DURATION * 1000)
+}
+function setQubitStatevector(newStatevector) {
+  qubitPosition.value = calculateCoordinates(newStatevector)
 }
 
 // const qubitAltitude = computed(() => {
 //   return Math.asin(qubitPosition.value.z)
 // })
 
+const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
 const qubitLinePoints = computed(() => {
   return [new Vector3(0, 0, 0), qubitPosition.value]
 })
 const rotationAxis = computed(
   () => currentGate?.value?.axis ?? [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
+  // this is a little hacky, but using `v-if` on the Line2 seems to cause issues
 )
-
-const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
 onLoop(({ delta }) => {
   if (currentGate.value !== null) {
     const angle = (delta / ANIMATION_DURATION) * currentGate.value.rotation
@@ -78,8 +86,9 @@ onLoop(({ delta }) => {
         <AxesLabels />
       </Suspense>
 
-      <Line2 :points="qubitLinePoints" :line-width="5" />
-      <Line2 :points="rotationAxis" color="#cfb805" :line-width="1" />
+      <Sphere :args="[0.02]" :position="qubitPosition" color="#cfb805" />
+      <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
+      <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
     </TresCanvas>
     <div id="qubit-display">
       <QubitDisplay :statevector="qubitStatevector" />
