@@ -1,18 +1,29 @@
 <script setup>
-defineEmits(['reset-zero', 'reset-one', 'gate'])
+defineEmits(['reset-zero', 'reset-one', 'gate', 'hover-gate', 'unhover-gate'])
+const GATE_BUTTONS = [
+  { key: 'x', class: 'pauli', labelHTML: 'X' },
+  { key: 's', class: 's', labelHTML: 'S' },
+  { key: 'y', class: 'pauli', labelHTML: 'Y' },
+  { key: 'sdg', class: 's', labelHTML: 'S<sup>†</sup>' },
+  { key: 'z', class: 'pauli', labelHTML: 'Z' },
+  { key: 't', class: 't', labelHTML: 'T' },
+  { key: 'h', class: 'h', labelHTML: 'H' },
+  { key: 'tdg', class: 't', labelHTML: 'T<sup>†</sup>' }
+]
 </script>
 <template>
   <div id="controls">
     <button class="reset" @click="$emit('reset-zero')">|0⟩</button>
     <button class="reset" @click="$emit('reset-one')">|1⟩</button>
-    <button class="pauli" @click="$emit('gate', 'x')">X</button>
-    <button class="s" @click="$emit('gate', 's')">S</button>
-    <button class="pauli" @click="$emit('gate', 'y')">Y</button>
-    <button class="s" @click="$emit('gate', 'sdg')">S<sup>†</sup></button>
-    <button class="pauli" @click="$emit('gate', 'z')">Z</button>
-    <button class="t" @click="$emit('gate', 't')">T</button>
-    <button class="h" @click="$emit('gate', 'h')">H</button>
-    <button class="t" @click="$emit('gate', 'tdg')">T<sup>†</sup></button>
+    <button
+      v-for="gate in GATE_BUTTONS"
+      :class="gate.class"
+      :key="gate.key"
+      @click="$emit('gate', gate.key)"
+      @mouseover="$emit('hover-gate', gate.key)"
+      @mouseout="$emit('unhover-gate', gate.key)"
+      v-html="gate.labelHTML"
+    />
   </div>
 </template>
 

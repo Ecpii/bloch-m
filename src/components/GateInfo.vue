@@ -1,0 +1,1 @@
+<template>Gate Information</template>

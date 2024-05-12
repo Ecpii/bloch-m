@@ -1,3 +1,15 @@
+/**
+ * All the math functions for qubits, using math.js.
+ * "Probabilities" in functions refer to an object like
+ * {
+ *  zeroProbability: number between 0 and 1,
+ *  oneProbability: number between 0 and 1, should be close to 1 - zeroProbability,
+ *  phase: angle in radians from positive x axis, between 0 and 6.283... (2pi)
+ * }
+ * "Statevector" is an array of two numbers. The first represents the amplitude of the
+ * zero state (square root of the probability), and the second one represents that of the
+ * one state but can be a complex number as it stores phase information.
+ */
 import {
   divide,
   subset,
@@ -12,6 +24,7 @@ import {
   complex
 } from 'mathjs'
 import { Vector3 } from 'three'
+
 export const GATES = {
   x: {
     matrix: matrix([
@@ -122,8 +135,8 @@ export function calculateCoordinates(statevector) {
   return new Vector3(x, y, z)
 }
 
-export function applyGate(statevector, gate) {
-  const res = multiply(GATES[gate].matrix, statevector)
+export function applyGate(statevector, gateName) {
+  const res = multiply(GATES[gateName].matrix, statevector)
   return normalizeStatevector(res)
 }
 
@@ -132,7 +145,6 @@ function normalizeStatevector(statevector) {
    * Returns statevector with real zero component and phase encoded on one component.
    * @param statevector math.matrix object of size 2.
    */
-  //
   const zero = subset(statevector, index(0))
   if (!zero?.isComplex) {
     return statevector
