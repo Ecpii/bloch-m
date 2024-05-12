@@ -46,7 +46,6 @@ function handleGate(gateName) {
     setQubitStatevector(endStatevector)
   }, ANIMATION_DURATION * 1000)
 }
-// todo: create function which shows the yellow rotation axis when hovering over gate icons?
 // todo: create parameterized gates
 function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
@@ -100,16 +99,16 @@ onLoop(({ delta }) => {
         <AxesLabels />
       </Suspense>
 
-      <Sphere :args="[0.02]" :position="qubitPosition" color="#cfb805" />
+      <Sphere :args="[0.015]" :position="qubitPosition" color="#cfb805" />
       <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
       <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
     </TresCanvas>
     <div id="state-display-container">
       <StateDisplay :statevector="qubitStatevector" />
     </div>
-    <!-- <div id="gate-info-container">
+    <div id="gate-info-container">
       <GateInfo :gate="hoveredGate" />
-    </div> -->
+    </div>
     <!-- create info panel on left side that shows gate information and matrix? -->
     <div id="controls-container">
       <GateControls
@@ -132,6 +131,7 @@ onLoop(({ delta }) => {
   transform: translateY(-50%);
 }
 #gate-info-container {
+  max-width: calc((100vw - 650px) / 2);
   position: absolute;
   left: 1rem;
   top: 50%;

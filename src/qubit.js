@@ -33,7 +33,14 @@ export const GATES = {
     ]),
     // i don't know enough linear algebra to find these eigenvectors programmatically D:
     axis: [new Vector3(1, 0, 0), new Vector3(-1, 0, 0)],
-    rotation: Math.PI
+    rotation: Math.PI,
+    name: 'Pauli X Gate',
+    description: 'Similar to a classical NOT gate. Switches the |0⟩ and |1⟩ components of a qubit.',
+    matrixTex: `X = \\begin{bmatrix} 0 & 1 \\\\ 1 & 0 \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|+\\rangle', value: '+1' },
+      { state: '|-\\rangle', value: '-1' }
+    ]
   },
   y: {
     matrix: matrix([
@@ -41,7 +48,14 @@ export const GATES = {
       [complex(0, 1), 0]
     ]),
     axis: [new Vector3(0, 1, 0), new Vector3(0, -1, 0)],
-    rotation: Math.PI
+    rotation: Math.PI,
+    name: 'Pauli Y Gate',
+    description: 'Switches the |0⟩ and |1⟩ components of a qubit, but adds π phase.',
+    matrixTex: `Y = \\begin{bmatrix} 0 & -i \\\\ i & 0 \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|R\\rangle', value: '+1' },
+      { state: '|L\\rangle', value: '-1' }
+    ]
   },
   z: {
     matrix: matrix([
@@ -49,7 +63,14 @@ export const GATES = {
       [0, -1]
     ]),
     axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
-    rotation: Math.PI
+    rotation: Math.PI,
+    name: 'Pauli Z Gate',
+    description: 'Rotates the sphere around the z-axis by π radians, which adds π phase.',
+    matrixTex: `Z = \\begin{bmatrix} 1 & 0 \\\\ 0 & -1 \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|0\\rangle', value: '+1' },
+      { state: '|1\\rangle', value: '-1' }
+    ]
   },
   h: {
     matrix: divide(
@@ -60,7 +81,15 @@ export const GATES = {
       sqrt(2)
     ),
     axis: [new Vector3(1 / sqrt(2), 0, 1 / sqrt(2)), new Vector3(-1 / sqrt(2), 0, -1 / sqrt(2))],
-    rotation: Math.PI
+    rotation: Math.PI,
+    name: 'Hadamard Gate',
+    description:
+      'Switches the X and Z axes, turning phaseflips into bitflips. For example: HXH = Z and HZH = X.',
+    matrixTex: `H = \\frac{1}{\\sqrt{2}} \\begin{bmatrix} 1 & 1 \\\\ 1 & -1 \\end{bmatrix}`,
+    eigenstates: [
+      { state: '(1 + \\sqrt{2})|0\\rangle + |1\\rangle', value: '+1' },
+      { state: '|0\\rangle + (-1 + \\sqrt{2})|1\\rangle', value: '+1' }
+    ]
   },
   s: {
     matrix: matrix([
@@ -68,7 +97,15 @@ export const GATES = {
       [0, complex(0, 1)]
     ]),
     axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
-    rotation: Math.PI / 2
+    rotation: Math.PI / 2,
+    name: 'S Gate',
+    description:
+      'Adds π/2 phase to a qubit. The square root of the Z gate, and the square of the T gate.',
+    matrixTex: `S = \\begin{bmatrix} 1 & 0  \\\\ 0 & i \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|0\\rangle', value: '+1' },
+      { state: '|1\\rangle', value: '+i' }
+    ]
   },
   sdg: {
     matrix: matrix([
@@ -76,7 +113,15 @@ export const GATES = {
       [0, complex(0, -1)]
     ]),
     axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
-    rotation: -Math.PI / 2
+    rotation: -Math.PI / 2,
+    name: 'S† Gate',
+    description:
+      'Subtracts π/2 phase from a qubit. The inverse (and conjugate transpose) of the S gate.',
+    matrixTex: `S^\\dagger = \\begin{bmatrix} 1 & 0  \\\\ 0 & -i \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|0\\rangle', value: '+1' },
+      { state: '|1\\rangle', value: '-i' }
+    ]
   },
   t: {
     matrix: matrix([
@@ -84,7 +129,14 @@ export const GATES = {
       [0, Complex.fromPolar(1, Math.PI / 4)]
     ]),
     axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
-    rotation: Math.PI / 4
+    rotation: Math.PI / 4,
+    name: 'T Gate',
+    description: 'Adds π/4 phase to a qubit. The square root of the S gate.',
+    matrixTex: `S = \\begin{bmatrix} 1 & 0  \\\\ 0 & e^{\\frac{\\pi i}{4}} \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|0\\rangle', value: '+1' },
+      { state: '|1\\rangle', value: 'e^{\\frac{\\pi i}{4}}' }
+    ]
   },
   tdg: {
     matrix: matrix([
@@ -92,7 +144,15 @@ export const GATES = {
       [0, Complex.fromPolar(1, -Math.PI / 4)]
     ]),
     axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
-    rotation: -Math.PI / 4
+    rotation: -Math.PI / 4,
+    name: 'T† Gate',
+    description:
+      'Subtracts π/4 phase from a qubit. The inverse (and conjugate transpose) of the T gate.',
+    matrixTex: `T^\\dagger = \\begin{bmatrix} 1 & 0  \\\\ 0 & e^{\\frac{-\\pi i}{4}} \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|0\\rangle', value: '+1' },
+      { state: '|1\\rangle', value: 'e^{\\frac{-\\pi i}{4}}' }
+    ]
   }
 }
 export function statevectorToProbabilities(statevector) {

@@ -1,1 +1,30 @@
-<template>Gate Information</template>
+<script setup>
+const { gate } = defineProps(['gate'])
+function renderKatex(input) {
+  return katex.renderToString(input)
+}
+</script>
+<template>
+  <template v-if="!gate">
+    <h1>Bloch M</h1>
+    A Bloch sphere visualizer.<br />
+    <i>Hover over any gate to see more information here.</i>
+  </template>
+  <template v-else>
+    <h1>{{ gate.name }}</h1>
+    {{ gate.description }}
+    <h2>Matrix</h2>
+    <div v-html="renderKatex(gate.matrixTex)" />
+    <h2>Eigenstates</h2>
+    <ul>
+      <li v-for="({ state, value }, index) in gate.eigenstates" :key="index">
+        <span v-html="renderKatex(state)" /> with eigenvalue <span v-html="renderKatex(value)" />
+      </li>
+    </ul>
+  </template>
+</template>
+<style scoped>
+i {
+  opacity: 0.6;
+}
+</style>
