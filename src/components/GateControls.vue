@@ -12,7 +12,7 @@ const GATE_BUTTONS = [
 ]
 </script>
 <template>
-  <div id="controls">
+  <div id="controls" @mouseleave="$emit('unhover-gate')">
     <button class="reset" @click="$emit('reset-zero')">|0⟩</button>
     <button class="reset" @click="$emit('reset-one')">|1⟩</button>
     <button
@@ -21,7 +21,6 @@ const GATE_BUTTONS = [
       :key="gate.key"
       @click="$emit('gate', gate.key)"
       @mouseover="$emit('hover-gate', gate.key)"
-      @mouseout="$emit('unhover-gate', gate.key)"
       v-html="gate.labelHTML"
     />
   </div>

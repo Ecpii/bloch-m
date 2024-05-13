@@ -65,7 +65,8 @@ export const GATES = {
     axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
     rotation: Math.PI,
     name: 'Pauli Z Gate',
-    description: 'Rotates the sphere around the z-axis by π radians, which adds π phase.',
+    description:
+      'Adds π phase to a qubit, corresponding to π radians of rotation around the z-axis.',
     matrixTex: `Z = \\begin{bmatrix} 1 & 0 \\\\ 0 & -1 \\end{bmatrix}`,
     eigenstates: [
       { state: '|0\\rangle', value: '+1' },
@@ -205,6 +206,7 @@ function normalizeStatevector(statevector) {
    * Returns statevector with real zero component and phase encoded on one component.
    * @param statevector math.matrix object of size 2.
    */
+  // convoluted way to get the first element because of mathjs
   const zero = subset(statevector, index(0))
   if (!zero?.isComplex) {
     return statevector

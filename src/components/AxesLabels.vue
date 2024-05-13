@@ -11,7 +11,9 @@ const POSITION_LABELS = [
   { position: [0, 1 + LABEL_OFFSET, 0], text: '|R⟩', key: 'y positive' },
   { position: [0, -1 - LABEL_OFFSET, 0], text: '|L⟩', key: 'y negative' },
   { position: [1 + LABEL_OFFSET, 0, 0], text: '|+⟩', key: 'x positive' },
-  { position: [-1 - LABEL_OFFSET, 0, 0], text: '|-⟩', key: 'x negative' }
+  { position: [-1 - LABEL_OFFSET, 0, 0], text: '|-⟩', key: 'x negative' },
+  { position: [1 + LABEL_OFFSET, 0, 0.15], text: 'X', key: 'x axis' },
+  { position: [0, 1 + LABEL_OFFSET, 0.15], text: 'Y', key: 'y axis' }
 ]
 </script>
 

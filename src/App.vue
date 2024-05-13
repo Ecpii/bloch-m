@@ -63,7 +63,8 @@ const rotationAxis = computed(
   () =>
     currentGate?.value?.axis ??
     hoveredGate?.value?.axis ?? [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
-  // this is a little hacky, but using `v-if` on the Line2 seems to cause issues
+  // changing the coordinates of the line from the origin to whatever points are needed
+  // seems kinda hacky, but conditionally rendering the Line2 seems to cause issues
 )
 onLoop(({ delta }) => {
   if (currentGate.value !== null) {
@@ -85,19 +86,18 @@ onLoop(({ delta }) => {
         :near="0.1"
         :far="100"
       />
-      <!-- todo: create shadows? -->
       <OrbitControls />
       <Stats />
-
-      <TresMesh :position="[0, 0, 0]" @pointer-down="handlePointerDown">
-        <TresSphereGeometry :args="[1, 64, 32]" />
-        <TresMeshBasicMaterial color="#7b97f9" :transparent="true" :opacity="0.2" />
-      </TresMesh>
 
       <AxesLines />
       <Suspense>
         <AxesLabels />
       </Suspense>
+
+      <TresMesh :position="[0, 0, 0]" @pointer-down="handlePointerDown">
+        <TresSphereGeometry :args="[1, 64, 32]" />
+        <TresMeshBasicMaterial color="#7b97f9" :transparent="true" :opacity="0.2" />
+      </TresMesh>
 
       <Sphere :args="[0.015]" :position="qubitPosition" color="#cfb805" />
       <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
