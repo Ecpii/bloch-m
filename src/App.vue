@@ -86,7 +86,7 @@ onLoop(({ delta }) => {
         :near="0.1"
         :far="100"
       />
-      <OrbitControls />
+      <OrbitControls :enable-zoom="false" />
       <Stats />
 
       <AxesLines />
@@ -103,22 +103,21 @@ onLoop(({ delta }) => {
       <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
       <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
     </TresCanvas>
-    <div id="state-display-container">
-      <StateDisplay :statevector="qubitStatevector" />
-    </div>
-    <div id="gate-info-container">
-      <GateInfo :gate="hoveredGate" />
-    </div>
-    <!-- create info panel on left side that shows gate information and matrix? -->
-    <div id="controls-container">
-      <GateControls
-        @reset-zero="setZeroState"
-        @reset-one="setOneState"
-        @gate="handleGate"
-        @hover-gate="handleHoverGate"
-        @unhover-gate="handleUnhoverGate"
-      />
-    </div>
+  </div>
+  <div id="state-display-container">
+    <StateDisplay :statevector="qubitStatevector" />
+  </div>
+  <div id="gate-info-container">
+    <GateInfo :gate="hoveredGate" />
+  </div>
+  <div id="controls-container">
+    <GateControls
+      @reset-zero="setZeroState"
+      @reset-one="setOneState"
+      @gate="handleGate"
+      @hover-gate="handleHoverGate"
+      @unhover-gate="handleUnhoverGate"
+    />
   </div>
 </template>
 
@@ -131,12 +130,21 @@ onLoop(({ delta }) => {
   transform: translateY(-50%);
 }
 #gate-info-container {
-  max-width: calc((100vw - 650px) / 2);
+  width: calc((100vw - 650px) / 2);
   position: absolute;
   left: 1rem;
   top: 50%;
   z-index: 10;
   transform: translateY(-50%);
+}
+@media (width < 1100px) {
+  #controls-container,
+  #gate-info-container {
+    top: 100vh;
+  }
+  #gate-info-container {
+    width: calc(100vw - 200px);
+  }
 }
 #state-display-container {
   position: absolute;
@@ -145,7 +153,7 @@ onLoop(({ delta }) => {
   transform: translateX(-50%);
 }
 #tres-canvas {
-  position: fixed;
+  position: absolute;
   width: 100%;
   height: 100%;
   z-index: 0;
