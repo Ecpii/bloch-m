@@ -3,7 +3,13 @@ import { computed, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
 import { Line2, OrbitControls, Stats, Sphere } from '@tresjs/cientos'
 import { Vector3 } from 'three'
-import { GATES, calculateStatevector, applyGate, calculateCoordinates } from './qubit'
+import {
+  GATES,
+  calculateStatevector,
+  applyGate,
+  calculateCoordinates,
+  generateRotationMatrix
+} from './qubit'
 
 import GateControls from './components/GateControls.vue'
 import GateInfo from './components/GateInfo.vue'
@@ -34,11 +40,10 @@ function handleUnhoverGate() {
 }
 function handleGate(gateName) {
   if (currentGate.value !== null) {
-    // todo: buffer gates
     return
   }
   const originalStatevector = qubitStatevector.value
-  const endStatevector = applyGate(originalStatevector, gateName)
+  const endStatevector = applyGate(originalStatevector, GATES[gateName])
   currentGate.value = GATES[gateName]
   setTimeout(() => {
     currentGate.value = null
@@ -46,14 +51,26 @@ function handleGate(gateName) {
     setQubitStatevector(endStatevector)
   }, ANIMATION_DURATION * 1000)
 }
-// todo: create parameterized gates
+function handleRotationGate(key, axis, angle) {
+  if (currentGate.value !== null) {
+    return
+  }
+  const newGate = GATES[key]
+  newGate.matrix = generateRotationMatrix(axis, angle)
+  newGate.rotation = angle
+
+  const originalStatevector = qubitStatevector.value
+  const endStatevector = applyGate(originalStatevector, newGate)
+  console.log('endStatevector', endStatevector)
+  currentGate.value = newGate
+  setTimeout(() => {
+    currentGate.value = null
+    setQubitStatevector(endStatevector)
+  }, ANIMATION_DURATION * 1000)
+}
 function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
 }
-
-// const qubitAltitude = computed(() => {
-//   return Math.asin(qubitPosition.value.z)
-// })
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
 const qubitLinePoints = computed(() => {
@@ -78,7 +95,7 @@ onLoop(({ delta }) => {
 
 <template>
   <div id="tres-canvas">
-    <TresCanvas :alpha="true" ref="canvasRef">
+    <TresCanvas :alpha="true">
       <TresPerspectiveCamera
         :up="[0, 0, 1]"
         :position="[4, 1, 1]"
@@ -115,6 +132,7 @@ onLoop(({ delta }) => {
       @reset-zero="setZeroState"
       @reset-one="setOneState"
       @gate="handleGate"
+      @rotation-gate="handleRotationGate"
       @hover-gate="handleHoverGate"
       @unhover-gate="handleUnhoverGate"
     />

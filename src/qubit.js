@@ -11,6 +11,7 @@
  * one state but can be a complex number as it stores phase information.
  */
 import {
+  exp,
   divide,
   subset,
   Complex,
@@ -89,7 +90,7 @@ export const GATES = {
     matrixTex: `H = \\frac{1}{\\sqrt{2}} \\begin{bmatrix} 1 & 1 \\\\ 1 & -1 \\end{bmatrix}`,
     eigenstates: [
       { state: '(1 + \\sqrt{2})|0\\rangle + |1\\rangle', value: '+1' },
-      { state: '|0\\rangle + (-1 + \\sqrt{2})|1\\rangle', value: '+1' }
+      { state: '(1 - \\sqrt{2})|0\\rangle + |1\\rangle', value: '-1' }
     ]
   },
   s: {
@@ -154,6 +155,108 @@ export const GATES = {
       { state: '|0\\rangle', value: '+1' },
       { state: '|1\\rangle', value: 'e^{\\frac{-\\pi i}{4}}' }
     ]
+  },
+  'rx+': {
+    axis: [new Vector3(1, 0, 0), new Vector3(-1, 0, 0)],
+    name: 'Rx (+θ) Gate',
+    description: 'Parameterized gate that rotates +θ radians around the x-axis.',
+    matrixTex: `Rx(\\theta) = \\begin{bmatrix}
+    \\cos\\left(\\frac{\\theta}{2}\\right) & -i\\sin(\\frac{\\theta}{2}) \\\\
+    -i\\sin(\\frac{\\theta}{2}) & \\cos(\\frac{\\theta}{2})
+    \\end{bmatrix}`,
+    eigenstates: [
+      {
+        state: '|+\\rangle',
+        value: '\\cos\\left(\\frac{\\theta}{2}\\right) - i\\sin\\left(\\frac{\\theta}{2}\\right)'
+      },
+      {
+        state: '|-\\rangle',
+        value: '\\cos\\left(\\frac{\\theta}{2}\\right) + i\\sin\\left(\\frac{\\theta}{2}\\right)'
+      }
+    ]
+  },
+  'rx-': {
+    axis: [new Vector3(1, 0, 0), new Vector3(-1, 0, 0)],
+    name: 'Rx (-θ) Gate',
+    description: 'Parameterized gate that rotates -θ radians around the x-axis.',
+    matrixTex: `Rx(\\theta) = \\begin{bmatrix}
+    \\cos\\left(-\\frac{\\theta}{2}\\right) & -i\\sin(-\\frac{\\theta}{2}) \\\\
+    -i\\sin(-\\frac{\\theta}{2}) & \\cos(-\\frac{\\theta}{2})
+    \\end{bmatrix}`,
+    eigenstates: [
+      {
+        state: '|+\\rangle',
+        value: '\\cos\\left(-\\frac{\\theta}{2}\\right) - i\\sin\\left(-\\frac{\\theta}{2}\\right)'
+      },
+      {
+        state: '|-\\rangle',
+        value: '\\cos\\left(-\\frac{\\theta}{2}\\right) + i\\sin\\left(-\\frac{\\theta}{2}\\right)'
+      }
+    ]
+  },
+  'ry+': {
+    axis: [new Vector3(0, 1, 0), new Vector3(0, -1, 0)],
+    name: 'Ry (+θ) Gate',
+    description: 'Parameterized gate that rotates +θ radians around the y-axis.',
+    matrixTex: `Ry(\\theta) = \\begin{bmatrix}
+    \\cos\\left(\\frac{\\theta}{2}\\right) & -\\sin(\\frac{\\theta}{2}) \\\\
+    \\sin(\\frac{\\theta}{2}) & \\cos(\\frac{\\theta}{2})
+    \\end{bmatrix}`,
+    eigenstates: [
+      {
+        state: '|R\\rangle',
+        value: '\\cos\\left(\\frac{\\theta}{2}\\right) - i\\sin\\left(\\frac{\\theta}{2}\\right)'
+      },
+      {
+        state: '|L\\rangle',
+        value: '\\cos\\left(\\frac{\\theta}{2}\\right) + i\\sin\\left(\\frac{\\theta}{2}\\right)'
+      }
+    ]
+  },
+  'ry-': {
+    axis: [new Vector3(0, 1, 0), new Vector3(0, -1, 0)],
+    name: 'Ry (-θ) Gate',
+    description: 'Parameterized gate that rotates -θ radians around the y-axis.',
+    matrixTex: `Ry(\\theta) = \\begin{bmatrix}
+    \\cos\\left(-\\frac{\\theta}{2}\\right) & -\\sin(-\\frac{\\theta}{2}) \\\\
+    \\sin(-\\frac{\\theta}{2}) & \\cos(-\\frac{\\theta}{2})
+    \\end{bmatrix}`,
+    eigenstates: [
+      {
+        state: '|R\\rangle',
+        value: '\\cos\\left(-\\frac{\\theta}{2}\\right) - i\\sin\\left(-\\frac{\\theta}{2}\\right)'
+      },
+      {
+        state: '|L\\rangle',
+        value: '\\cos\\left(-\\frac{\\theta}{2}\\right) + i\\sin\\left(-\\frac{\\theta}{2}\\right)'
+      }
+    ]
+  },
+  'rz+': {
+    axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
+    name: 'Rz (+θ) Gate',
+    description: 'Parameterized gate that rotates +θ radians around the z-axis.',
+    matrixTex: `Rz(\\theta) = \\begin{bmatrix}
+    e^{-\\theta/2 i} & 0 \\\\
+    0 & e^{\\theta/2 i}
+    \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|0\\rangle', value: 'e^{-\\theta/2i}' },
+      { state: '|1\\rangle', value: 'e^{\\theta/2i}' }
+    ]
+  },
+  'rz-': {
+    axis: [new Vector3(0, 0, 1), new Vector3(0, 0, -1)],
+    name: 'Rz (-θ) Gate',
+    description: 'Parameterized gate that rotates -θ radians around the z-axis.',
+    matrixTex: `Rz(\\theta) = \\begin{bmatrix}
+    e^{\\theta/2 i} & 0 \\\\
+    0 & e^{-\\theta/2 i}
+    \\end{bmatrix}`,
+    eigenstates: [
+      { state: '|0\\rangle', value: '+1' },
+      { state: '|1\\rangle', value: 'e^{\\theta/2i}' }
+    ]
   }
 }
 export function statevectorToProbabilities(statevector) {
@@ -196,8 +299,9 @@ export function calculateCoordinates(statevector) {
   return new Vector3(x, y, z)
 }
 
-export function applyGate(statevector, gateName) {
-  const res = multiply(GATES[gateName].matrix, statevector)
+export function applyGate(statevector, gate) {
+  const res = multiply(gate.matrix, statevector)
+  console.log('res', res)
   return normalizeStatevector(res)
 }
 
@@ -216,4 +320,23 @@ function normalizeStatevector(statevector) {
   const { r: oneAmplitude, phi: oneAngle } = one.toPolar()
   const newOneAngle = oneAngle - zeroAngle
   return [zeroAmplitude, Complex.fromPolar(oneAmplitude, newOneAngle)]
+}
+
+export function generateRotationMatrix(axis, angle) {
+  if (axis === 'x') {
+    return matrix([
+      [cos(angle / 2), multiply(complex(0, -1), sin(angle / 2))],
+      [multiply(complex(0, -1), sin(angle / 2)), cos(angle / 2)]
+    ])
+  } else if (axis === 'y') {
+    return matrix([
+      [cos(angle / 2), -1 * sin(angle / 2)],
+      [sin(angle / 2), cos(angle / 2)]
+    ])
+  } else if (axis === 'z') {
+    return matrix([
+      [exp(multiply(complex(0, -1), angle / 2)), 0],
+      [0, exp(multiply(complex(0, 1), angle / 2))]
+    ])
+  }
 }
