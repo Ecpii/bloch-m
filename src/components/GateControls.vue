@@ -126,5 +126,7 @@ button.reset:hover {
   font-size: inherit;
   font-family: inherit;
   border: none;
+  background: inherit;
+  color: var(--primary);
 }
 </style>

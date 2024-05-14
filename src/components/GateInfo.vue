@@ -7,8 +7,11 @@ function renderKatex(input) {
 <template>
   <template v-if="!gate">
     <h1>Bloch M</h1>
-    A Bloch sphere visualizer.<br />
+    A Bloch sphere visualization tool to help illustrate how single-qubit gates work. <br />
     <i>Hover over any gate to see more information here.</i>
+    <br />
+    <a href="https://github.com/Ecpii/bloch-m" target="_blank">GitHub</a> |
+    <a href="https://javafxpert.github.io/grok-bloch/" target="_blank">Inspiration</a>
   </template>
   <template v-else>
     <h1>{{ gate.name }}</h1>

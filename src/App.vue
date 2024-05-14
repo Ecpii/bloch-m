@@ -1,7 +1,7 @@
 <script setup>
 import { computed, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
-import { Line2, OrbitControls, Stats, Sphere } from '@tresjs/cientos'
+import { Line2, OrbitControls, Sphere } from '@tresjs/cientos'
 import { Vector3 } from 'three'
 import {
   GATES,
@@ -61,7 +61,6 @@ function handleRotationGate(key, axis, angle) {
 
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, newGate)
-  console.log('endStatevector', endStatevector)
   currentGate.value = newGate
   setTimeout(() => {
     currentGate.value = null
@@ -104,7 +103,6 @@ onLoop(({ delta }) => {
         :far="100"
       />
       <OrbitControls :enable-zoom="false" />
-      <Stats />
 
       <AxesLines />
       <Suspense>
