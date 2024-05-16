@@ -16,11 +16,12 @@ import GateInfo from './components/GateInfo.vue'
 import StateDisplay from './components/StateDisplay.vue'
 import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
+import AnimationSettings from './components/AnimationSettings.vue'
 
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
 const hoveredGate = shallowRef(null)
-const ANIMATION_DURATION = 0.2
+const animationDuration = shallowRef(0.4)
 const { onLoop } = useRenderLoop()
 
 function handlePointerDown(intersection) {
@@ -42,14 +43,7 @@ function handleGate(gateName) {
   if (currentGate.value !== null) {
     return
   }
-  const originalStatevector = qubitStatevector.value
-  const endStatevector = applyGate(originalStatevector, GATES[gateName])
-  currentGate.value = GATES[gateName]
-  setTimeout(() => {
-    currentGate.value = null
-    // since the animation will be off, we recorrect with the calculated gate matrix on initial statevector
-    setQubitStatevector(endStatevector)
-  }, ANIMATION_DURATION * 1000)
+  fireGate(GATES[gateName])
 }
 function handleRotationGate(key, axis, angle) {
   if (currentGate.value !== null) {
@@ -58,14 +52,17 @@ function handleRotationGate(key, axis, angle) {
   const newGate = GATES[key]
   newGate.matrix = generateRotationMatrix(axis, angle)
   newGate.rotation = angle
+  fireGate(newGate)
+}
 
+function fireGate(gate) {
   const originalStatevector = qubitStatevector.value
-  const endStatevector = applyGate(originalStatevector, newGate)
-  currentGate.value = newGate
+  const endStatevector = applyGate(originalStatevector, gate)
+  currentGate.value = gate
   setTimeout(() => {
     currentGate.value = null
     setQubitStatevector(endStatevector)
-  }, ANIMATION_DURATION * 1000)
+  }, animationDuration.value * 1000)
 }
 function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
@@ -84,7 +81,7 @@ const rotationAxis = computed(
 )
 onLoop(({ delta }) => {
   if (currentGate.value !== null) {
-    const angle = (delta / ANIMATION_DURATION) * currentGate.value.rotation
+    const angle = (delta / animationDuration.value) * currentGate.value.rotation
     qubitPosition.value.applyAxisAngle(currentGate.value.axis[0], angle)
     // without this triggerRef the qubitPosition line will not animate
     triggerRef(qubitPosition)
@@ -135,9 +132,18 @@ onLoop(({ delta }) => {
       @unhover-gate="handleUnhoverGate"
     />
   </div>
+  <div id="speed-controls">
+    <AnimationSettings v-model="animationDuration" />
+  </div>
 </template>
 
 <style scoped>
+#speed-controls {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 10;
+}
 #controls-container {
   position: absolute;
   right: 1rem;
