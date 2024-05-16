@@ -39,6 +39,10 @@ input[type='range']:focus {
   outline: none;
 }
 
+input[type='range']:disabled {
+  opacity: 0.5;
+}
+
 /******** Chrome, Safari, Opera and Edge Chromium styles ********/
 /* slider track */
 input[type='range']::-webkit-slider-runnable-track {
