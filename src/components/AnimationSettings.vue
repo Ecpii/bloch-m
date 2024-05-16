@@ -1,7 +1,7 @@
 <script setup>
 const duration = defineModel()
+const { disabled } = defineProps(['disabled'])
 function formatDuration(duration) {
-  console.log('typeof duration', typeof duration)
   let durationMs = parseFloat(duration)
   if (durationMs < 1) {
     return `${durationMs * 1000} ms`
@@ -20,6 +20,7 @@ function formatDuration(duration) {
     max="2"
     step="0.1"
     v-model="duration"
+    :disabled
   />
 </template>
 <style scoped>

@@ -133,7 +133,7 @@ onLoop(({ delta }) => {
     />
   </div>
   <div id="speed-controls">
-    <AnimationSettings v-model="animationDuration" />
+    <AnimationSettings :disabled="currentGate !== null" v-model="animationDuration" />
   </div>
 </template>
 

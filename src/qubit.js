@@ -301,7 +301,6 @@ export function calculateCoordinates(statevector) {
 
 export function applyGate(statevector, gate) {
   const res = multiply(gate.matrix, statevector)
-  console.log('res', res)
   return normalizeStatevector(res)
 }
 
