@@ -26,12 +26,10 @@ const animationDuration = shallowRef(1) // in seconds
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
-const lightRef = shallowRef(null) // directional light
-const cameraRef = shallowRef(null)
-let arcPoints = shallowRef([])
+const arcPoints = ref([])
 const { onLoop } = useRenderLoop()
 
-function handlePointerDown(intersection) {
+function handleTresPointerDown(intersection) {
   qubitPosition.value = intersection.point
 }
 function setZeroState() {
@@ -61,16 +59,13 @@ function handleRotationGate(key, axis, angle) {
   newGate.rotation = angle
   fireGate(newGate)
 }
-
 function createAxisCopies() {
   axesGuideRef.value.visible = true
 }
-
 function removeAxisCopies() {
   axesGuideRef.value.visible = false
   axesGuideRef.value.setRotationFromEuler(new Euler()) // reset rotation
 }
-
 function fireGate(gate) {
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, gate)
@@ -88,9 +83,7 @@ function setQubitStatevector(newStatevector) {
 }
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
-const qubitLinePoints = computed(() => {
-  return [new Vector3(0, 0, 0), qubitPosition.value]
-})
+const qubitLinePoints = computed(() => [new Vector3(0, 0, 0), qubitPosition.value])
 const rotationAxis = computed(
   () =>
     currentGate?.value?.axis ??
@@ -99,12 +92,10 @@ const rotationAxis = computed(
   // seems kinda hacky, but conditionally rendering the Line2 seems to cause issues
 )
 const rotationArc = computed(() => {
-  const material = new LineBasicMaterial({ color: 0xcfb805, linewidth: 3 })
   if (!arcPoints.value.length) {
-    return new Line(
-      new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(0, 0, 0)])
-    )
+    return new Line()
   }
+  const material = new LineBasicMaterial({ color: 0xcfb805, linewidth: 3 })
   const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
   return new Line(geometry, material)
 })
@@ -114,32 +105,30 @@ onLoop(({ delta }) => {
     qubitPosition.value.applyAxisAngle(currentGate.value.axis[0], angle)
     axesGuideRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
     sphereRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
+    // for some reason the point will not update its own position without this line
     pointRef.value.position.copy(qubitPosition.value)
+    // store points we've traced on this rotation
     arcPoints.value.push(qubitPosition.value.clone())
-    console.log('arcPoints.value', arcPoints.value)
     // without this triggerRef the qubitPosition line will not animate
     triggerRef(qubitPosition)
-    triggerRef(arcPoints)
   }
 })
 </script>
 
 <template>
   <div id="tres-canvas">
-    <TresCanvas :alpha="true" shadows>
+    <TresCanvas :alpha="true">
       <TresPerspectiveCamera
         :up="[0, 0, 1]"
         :position="[4, 1, 1]"
         :look-at="[0, 0, 0]"
         :near="0.1"
-        :far="10"
+        :far="100"
         ref="cameraRef"
       />
-      <TresAmbientLight color="#fff" :intensity="1" />
-      <TresDirectionalLight cast-shadow :position="[0, 0, 2]" :intensity="20" ref="lightRef" />
       <Stats />
 
-      <OrbitControls :enable-zoom="false" />
+      <OrbitControls />
 
       <AxesLines />
       <AxesLabels />
@@ -173,20 +162,16 @@ onLoop(({ delta }) => {
       </TresGroup>
 
       <primitive :object="rotationArc" />
+      <!-- i dont know why neither of these below solutions work and i have to use a primitive -->
+      <!-- <Line2 :points="arcPoints" color="#cfb805" :line-width="3" v-if="arcPoints.length !== 0" /> -->
+      <!-- <TresLine>
+        <TresBufferGeometry :set-from-points="[arcPoints]" />
+        <TresLineBasicMaterial color="#cfb805" />
+      </TresLine> -->
 
-      <TresMesh
-        receive-shadow
-        :position="[0, 0, 0]"
-        @pointer-down="handlePointerDown"
-        ref="sphereRef"
-      >
+      <TresMesh :position="[0, 0, 0]" @pointer-down="handleTresPointerDown" ref="sphereRef">
         <TresSphereGeometry :args="[1, 64, 64]" />
-        <TresMeshPhongMaterial
-          color="#7995f9"
-          :transparent="true"
-          :opacity="0.3"
-          :premultiplied-alpha="true"
-        />
+        <TresMeshBasicMaterial color="#7995f9" :transparent="true" :opacity="0.25" />
       </TresMesh>
 
       <TresMesh :position="qubitPosition" ref="pointRef">
@@ -194,7 +179,7 @@ onLoop(({ delta }) => {
         <TresMeshBasicMaterial color="#cfb805" />
       </TresMesh>
       <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
-      <Line2 receive-shadow :points="rotationAxis" color="#cfb805" :line-width="3" />
+      <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
     </TresCanvas>
   </div>
   <div id="state-display-container">

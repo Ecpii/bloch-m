@@ -37,7 +37,7 @@ const LINE_PROPERTIES = {
     <TresTorusGeometry :args="[0.99, 0.001, 8, 64]" />
     <TresMeshBasicMaterial color="#222222" />
   </TresMesh>
-  <TresMesh cast-shadow :rotation-x="Math.PI / 2">
+  <TresMesh :rotation-x="Math.PI / 2">
     <TresCylinderGeometry :args="[0.99, 0.99, 0.01, 64, 1]" />
     <TresMeshBasicMaterial color="#7b97f9" :transparent="true" :opacity="0.2" />
   </TresMesh>
