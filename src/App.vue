@@ -28,6 +28,7 @@ const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
 const lightRef = shallowRef(null) // directional light
 const cameraRef = shallowRef(null)
+let arcPoints = shallowRef([])
 const { onLoop } = useRenderLoop()
 
 function handlePointerDown(intersection) {
@@ -67,14 +68,14 @@ function createAxisCopies() {
 
 function removeAxisCopies() {
   axesGuideRef.value.visible = false
-  // lineRef.value.clear()
-  axesGuideRef.value.setRotationFromEuler(new Euler())
+  axesGuideRef.value.setRotationFromEuler(new Euler()) // reset rotation
 }
 
 function fireGate(gate) {
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, gate)
   createAxisCopies()
+  arcPoints.value = []
   currentGate.value = gate
   setTimeout(() => {
     currentGate.value = null
@@ -97,20 +98,29 @@ const rotationAxis = computed(
   // changing the coordinates of the line from the origin to whatever points are needed
   // seems kinda hacky, but conditionally rendering the Line2 seems to cause issues
 )
+const rotationArc = computed(() => {
+  const material = new LineBasicMaterial({ color: 0xcfb805, linewidth: 3 })
+  if (!arcPoints.value.length) {
+    return new Line(
+      new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(0, 0, 0)])
+    )
+  }
+  const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
+  return new Line(geometry, material)
+})
 onLoop(({ delta }) => {
   if (currentGate.value !== null) {
     const angle = (delta / animationDuration.value) * currentGate.value.rotation
     qubitPosition.value.applyAxisAngle(currentGate.value.axis[0], angle)
     axesGuideRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
     sphereRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
-    // lightRef.value.position.applyAxisAngle(currentGate.value.axis[0], angle)
     pointRef.value.position.copy(qubitPosition.value)
+    arcPoints.value.push(qubitPosition.value.clone())
+    console.log('arcPoints.value', arcPoints.value)
     // without this triggerRef the qubitPosition line will not animate
     triggerRef(qubitPosition)
+    triggerRef(arcPoints)
   }
-  // const lightPosition = cameraRef.value.position.clone()
-  // lightPosition.setComponent(2, 1)
-  // lightRef.value.position.copy(lightPosition)
 })
 </script>
 
@@ -126,10 +136,7 @@ onLoop(({ delta }) => {
         ref="cameraRef"
       />
       <TresAmbientLight color="#fff" :intensity="1" />
-      <TresDirectionalLight cast-shadow :position="[7, 3, 3]" :intensity="20" ref="lightRef" />
-      <!-- <TresDirectionalLight cast-shadow :position="[1, 1, 1]" :intensity="10" /> -->
-      <!-- <TresSpotLight cast-shadow :position="[1, 1, 1]" :intensity="100" /> -->
-      <!-- <TresDirectionalLight cast-shadow :position="[-1, -1, -1]" :intensity="10" /> -->
+      <TresDirectionalLight cast-shadow :position="[0, 0, 2]" :intensity="20" ref="lightRef" />
       <Stats />
 
       <OrbitControls :enable-zoom="false" />
@@ -164,6 +171,8 @@ onLoop(({ delta }) => {
           :line-width="3"
         />
       </TresGroup>
+
+      <primitive :object="rotationArc" />
 
       <TresMesh
         receive-shadow
