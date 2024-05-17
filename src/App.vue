@@ -1,7 +1,7 @@
 <script setup>
-import { computed, shallowRef, triggerRef } from 'vue'
+import { computed, ref, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
-import { Line2, OrbitControls, Sphere } from '@tresjs/cientos'
+import { Line2, OrbitControls, Sphere, Stats, Sparkles } from '@tresjs/cientos'
 import { Vector3, BufferGeometry, Line, LineBasicMaterial, Object3D, Euler } from 'three'
 import {
   GATES,
@@ -23,8 +23,11 @@ const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
 const hoveredGate = shallowRef(null)
 const animationDuration = shallowRef(1) // in seconds
-const lineRef = shallowRef(null)
-const sphereRef = shallowRef(null)
+const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
+const sphereRef = shallowRef(null) // ref to the bloch sphere
+const pointRef = shallowRef(null) // point on end of the qubit line
+const lightRef = shallowRef(null) // directional light
+const cameraRef = shallowRef(null)
 const { onLoop } = useRenderLoop()
 
 function handlePointerDown(intersection) {
@@ -59,24 +62,13 @@ function handleRotationGate(key, axis, angle) {
 }
 
 function createAxisCopies() {
-  // console.log('lineRef.value.rotation', lineRef.value.rotation)
-  // const material = new LineBasicMaterial({ color: 0x7b97f9 })
-  // const xAxisPoints = [new Vector3(-1, 0, 0), new Vector3(1, 0, 0)]
-  // const yAxisPoints = [new Vector3(0, -1, 0), new Vector3(0, 1, 0)]
-  // const zAxisPoints = [new Vector3(0, 0, -1), new Vector3(0, 0, 1)]
-  // const xAxisGeometry = new BufferGeometry().setFromPoints(xAxisPoints)
-  // const yAxisGeometry = new BufferGeometry().setFromPoints(yAxisPoints)
-  // const zAxisGeometry = new BufferGeometry().setFromPoints(zAxisPoints)
-  // lineRef.value.add(new Line(xAxisGeometry, material))
-  // lineRef.value.add(new Line(yAxisGeometry, material))
-  // lineRef.value.add(new Line(zAxisGeometry, material))
-  lineRef.value.visible = true
+  axesGuideRef.value.visible = true
 }
 
 function removeAxisCopies() {
-  lineRef.value.visible = false
+  axesGuideRef.value.visible = false
   // lineRef.value.clear()
-  lineRef.value.setRotationFromEuler(new Euler())
+  axesGuideRef.value.setRotationFromEuler(new Euler())
 }
 
 function fireGate(gate) {
@@ -109,39 +101,51 @@ onLoop(({ delta }) => {
   if (currentGate.value !== null) {
     const angle = (delta / animationDuration.value) * currentGate.value.rotation
     qubitPosition.value.applyAxisAngle(currentGate.value.axis[0], angle)
-    lineRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
+    axesGuideRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
     sphereRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
+    // lightRef.value.position.applyAxisAngle(currentGate.value.axis[0], angle)
+    pointRef.value.position.copy(qubitPosition.value)
     // without this triggerRef the qubitPosition line will not animate
     triggerRef(qubitPosition)
   }
+  // const lightPosition = cameraRef.value.position.clone()
+  // lightPosition.setComponent(2, 1)
+  // lightRef.value.position.copy(lightPosition)
 })
 </script>
 
 <template>
   <div id="tres-canvas">
-    <TresCanvas :alpha="true">
+    <TresCanvas :alpha="true" shadows>
       <TresPerspectiveCamera
         :up="[0, 0, 1]"
         :position="[4, 1, 1]"
         :look-at="[0, 0, 0]"
         :near="0.1"
-        :far="100"
+        :far="10"
+        ref="cameraRef"
       />
-      <!-- <TresAmbientLight :intensity="1" />
-      <TresDirectionalLight cast-shadow :position="[1, 1, 1]" :intensity="10" /> -->
+      <TresAmbientLight color="#fff" :intensity="1" />
+      <TresDirectionalLight cast-shadow :position="[7, 3, 3]" :intensity="20" ref="lightRef" />
+      <!-- <TresDirectionalLight cast-shadow :position="[1, 1, 1]" :intensity="10" /> -->
+      <!-- <TresSpotLight cast-shadow :position="[1, 1, 1]" :intensity="100" /> -->
+      <!-- <TresDirectionalLight cast-shadow :position="[-1, -1, -1]" :intensity="10" /> -->
+      <Stats />
 
       <OrbitControls :enable-zoom="false" />
 
       <AxesLines />
       <AxesLabels />
 
-      <TresGroup ref="lineRef" :up="[0, 0, 1]" :visible="false">
+      <TresGroup ref="axesGuideRef" :up="[0, 0, 1]" :visible="false">
+        <!-- <TresAxesHelper /> -->
         <Line2
           :points="[
             [0, 0, -1],
             [0, 0, 1]
           ]"
           color="#7b97f9"
+          :line-width="3"
         />
         <Line2
           :points="[
@@ -149,6 +153,7 @@ onLoop(({ delta }) => {
             [0, 1, 0]
           ]"
           color="#7b97f9"
+          :line-width="3"
         />
         <Line2
           :points="[
@@ -156,17 +161,31 @@ onLoop(({ delta }) => {
             [1, 0, 0]
           ]"
           color="#7b97f9"
+          :line-width="3"
         />
       </TresGroup>
 
-      <TresMesh :position="[0, 0, 0]" @pointer-down="handlePointerDown" ref="sphereRef">
-        <TresSphereGeometry :args="[1, 64, 32]" />
-        <TresMeshStandardMaterial color="#7b97f9" :transparent="true" :opacity="0.2" />
+      <TresMesh
+        receive-shadow
+        :position="[0, 0, 0]"
+        @pointer-down="handlePointerDown"
+        ref="sphereRef"
+      >
+        <TresSphereGeometry :args="[1, 64, 64]" />
+        <TresMeshPhongMaterial
+          color="#7995f9"
+          :transparent="true"
+          :opacity="0.3"
+          :premultiplied-alpha="true"
+        />
       </TresMesh>
 
-      <Sphere :args="[0.015]" :position="qubitPosition" color="#cfb805" />
+      <TresMesh :position="qubitPosition" ref="pointRef">
+        <TresSphereGeometry :args="[0.015]" />
+        <TresMeshBasicMaterial color="#cfb805" />
+      </TresMesh>
       <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
-      <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
+      <Line2 receive-shadow :points="rotationAxis" color="#cfb805" :line-width="3" />
     </TresCanvas>
   </div>
   <div id="state-display-container">

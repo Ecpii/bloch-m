@@ -254,8 +254,8 @@ export const GATES = {
     0 & e^{-\\theta/2 i}
     \\end{bmatrix}`,
     eigenstates: [
-      { state: '|0\\rangle', value: '+1' },
-      { state: '|1\\rangle', value: 'e^{\\theta/2i}' }
+      { state: '|0\\rangle', value: 'e^{\\theta/2i}' },
+      { state: '|1\\rangle', value: 'e^{-\\theta/2i}' }
     ]
   }
 }
