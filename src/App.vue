@@ -201,9 +201,6 @@ onLoop(({ delta }) => {
   <div id="state-display-container">
     <StateDisplay :statevector="qubitStatevector" />
   </div>
-  <div id="gate-info-container">
-    <GateInfo :gate="hoveredGate" />
-  </div>
   <div id="controls-container">
     <GateControls
       @reset-zero="setZeroState"
@@ -214,13 +211,16 @@ onLoop(({ delta }) => {
       @unhover-gate="handleUnhoverGate"
     />
   </div>
-  <div id="speed-controls">
+  <div id="gate-info-container">
+    <GateInfo :gate="hoveredGate" />
+  </div>
+  <div id="animation-settings">
     <AnimationSettings :disabled="currentGate !== null" v-model="config" />
   </div>
 </template>
 
 <style scoped>
-#speed-controls {
+#animation-settings {
   position: absolute;
   left: 1rem;
   bottom: 1rem;
@@ -241,15 +241,6 @@ onLoop(({ delta }) => {
   z-index: 10;
   transform: translateY(-50%);
 }
-@media (width < 1100px) {
-  #controls-container,
-  #gate-info-container {
-    top: 100vh;
-  }
-  #gate-info-container {
-    width: calc(100vw - 200px);
-  }
-}
 #state-display-container {
   position: absolute;
   top: 1rem;
@@ -257,9 +248,36 @@ onLoop(({ delta }) => {
   transform: translateX(-50%);
 }
 #tres-canvas {
-  position: absolute;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   z-index: 0;
+}
+@media (width < 1100px) {
+  /* #controls-container,
+  #gate-info-container {
+    top: 100vh;
+  }
+  #gate-info-container {
+    width: calc(100vw - 200px);
+  } */
+  #tres-canvas {
+    height: max(calc(650px + 2 * 2rem), 50vh);
+  }
+  #controls-container {
+    position: static;
+    float: inline-end;
+    transform: none;
+  }
+  #gate-info-container {
+    position: static;
+    transform: none;
+    width: calc(100% - 2rem);
+    padding: 1rem;
+  }
+  #animation-settings {
+    position: static;
+    width: calc(100% - 2rem);
+    padding: 1rem;
+  }
 }
 </style>

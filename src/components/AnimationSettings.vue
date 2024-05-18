@@ -55,7 +55,7 @@ input[type='range'] {
   appearance: none;
   background: transparent;
   cursor: pointer;
-  width: 20rem;
+  width: min(20rem, calc(100% - 1rem));
 }
 
 /* Removes default focus */

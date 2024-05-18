@@ -110,7 +110,8 @@ button.reset:hover {
 #controls {
   display: grid;
   grid-template-columns: 4rem 4rem;
-  grid-template-rows: repeat(9, 4rem);
+  /* grid-template-rows: repeat(9, 4rem); */
+  grid-auto-rows: 4rem;
   gap: 1rem;
 }
 #select-theta {

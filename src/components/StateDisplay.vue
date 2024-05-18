@@ -22,4 +22,9 @@ function renderKatex() {
 div {
   font-size: 2rem;
 }
+@media (width < 600px) {
+  div {
+    font-size: 1.5rem;
+  }
+}
 </style>
