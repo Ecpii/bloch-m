@@ -49,7 +49,7 @@ function getAngle(fraction, isPositive) {
     <div id="select-theta">
       <hr />
       θ =
-      <select v-model="theta">
+      <select id="theta-select" v-model="theta">
         <option value="pi/2">π/2</option>
         <option value="pi/4">π/4</option>
         <option value="pi/8">π/8</option>
