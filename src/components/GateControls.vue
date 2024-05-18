@@ -1,6 +1,6 @@
 <script setup>
 import { shallowRef } from 'vue'
-defineEmits(['reset-zero', 'reset-one', 'gate', 'hover-gate', 'unhover-gate', 'rotation-gate'])
+defineEmits(['set-state', 'gate', 'hover-gate', 'unhover-gate', 'rotation-gate'])
 const GATE_BUTTONS = [
   { key: 'x', class: 'pauli', labelHTML: 'X' },
   { key: 's', class: 's', labelHTML: 'S' },
@@ -36,8 +36,8 @@ function getAngle(fraction, isPositive) {
 </script>
 <template>
   <div id="controls" @mouseleave="$emit('unhover-gate')">
-    <button class="reset" @click="$emit('reset-zero')">|0⟩</button>
-    <button class="reset" @click="$emit('reset-one')">|1⟩</button>
+    <button class="reset" @click="$emit('set-state', '0')">|0⟩</button>
+    <button class="reset" @click="$emit('set-state', '1')">|1⟩</button>
     <button
       v-for="gate in GATE_BUTTONS"
       :class="gate.class"

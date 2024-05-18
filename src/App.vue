@@ -36,11 +36,12 @@ const { onLoop } = useRenderLoop()
 function handleTresPointerDown(intersection) {
   qubitPosition.value = intersection.point
 }
-function setZeroState() {
-  qubitPosition.value = new Vector3(0, 0, 1)
-}
-function setOneState() {
-  qubitPosition.value = new Vector3(0, 0, -1)
+function setState(stateName) {
+  if (stateName === '0') {
+    qubitPosition.value = new Vector3(0, 0, 1)
+  } else if (stateName === '1') {
+    qubitPosition.value = new Vector3(0, 0, -1)
+  }
 }
 function handleHoverGate(gateName) {
   hoveredGate.value = GATES[gateName]
@@ -203,8 +204,7 @@ onLoop(({ delta }) => {
   </div>
   <div id="controls-container">
     <GateControls
-      @reset-zero="setZeroState"
-      @reset-one="setOneState"
+      @set-state="setState"
       @gate="handleGate"
       @rotation-gate="handleRotationGate"
       @hover-gate="handleHoverGate"
@@ -253,13 +253,6 @@ onLoop(({ delta }) => {
   z-index: 0;
 }
 @media (width < 1100px) {
-  /* #controls-container,
-  #gate-info-container {
-    top: 100vh;
-  }
-  #gate-info-container {
-    width: calc(100vw - 200px);
-  } */
   #tres-canvas {
     height: max(calc(650px + 2 * 2rem), 50vh);
   }
