@@ -14,11 +14,11 @@ function formatDuration(duration) {
   <div id="container">
     <div class="checkbox-container">
       <label for="arc">Show qubit arc</label>
-      <input id="arc" type="checkbox" v-model="config.showRotationArc" />
+      <input id="arc" type="checkbox" v-model="config.showRotationArc" :disabled />
     </div>
     <div class="checkbox-container">
       <label for="axes-helpers">Show axes during rotation</label>
-      <input id="axes-helpers" type="checkbox" v-model="config.showAxesHelpers" />
+      <input id="axes-helpers" type="checkbox" v-model="config.showAxesHelpers" :disabled />
     </div>
     <div>
       <label for="duration"
