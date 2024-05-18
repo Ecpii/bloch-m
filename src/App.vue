@@ -22,7 +22,11 @@ Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
 const hoveredGate = shallowRef(null)
-const animationDuration = shallowRef(1) // in seconds
+const config = ref({
+  animationDuration: 1,
+  showAxesHelpers: false,
+  showRotationArc: true
+})
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
@@ -69,14 +73,20 @@ function removeAxisCopies() {
 function fireGate(gate) {
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, gate)
-  createAxisCopies()
+  if (config.value.showAxesHelpers) {
+    createAxisCopies()
+  }
   arcPoints.value = []
   currentGate.value = gate
   setTimeout(() => {
-    currentGate.value = null
     setQubitStatevector(endStatevector)
-    setTimeout(removeAxisCopies, 500)
-  }, animationDuration.value * 1000)
+    currentGate.value = null
+    setTimeout(() => {
+      if (currentGate.value === null) {
+        removeAxisCopies()
+      }
+    }, 500)
+  }, config.value.animationDuration * 1000)
 }
 function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
@@ -92,23 +102,29 @@ const rotationAxis = computed(
   // seems kinda hacky, but conditionally rendering the Line2 seems to cause issues
 )
 const rotationArc = computed(() => {
-  if (!arcPoints.value.length) {
+  if (!config.value.showRotationArc || !arcPoints.value.length) {
     return new Line()
   }
   const material = new LineBasicMaterial({ color: 0xcfb805, linewidth: 3 })
   const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
   return new Line(geometry, material)
 })
+
 onLoop(({ delta }) => {
   if (currentGate.value !== null) {
-    const angle = (delta / animationDuration.value) * currentGate.value.rotation
+    const angle = (delta / config.value.animationDuration) * currentGate.value.rotation
     qubitPosition.value.applyAxisAngle(currentGate.value.axis[0], angle)
-    axesGuideRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
     sphereRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
     // for some reason the point will not update its own position without this line
     pointRef.value.position.copy(qubitPosition.value)
-    // store points we've traced on this rotation
-    arcPoints.value.push(qubitPosition.value.clone())
+
+    if (config.value.showAxesHelpers) {
+      axesGuideRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
+    }
+    if (config.value.showRotationArc) {
+      // store points we've traced on this rotation
+      arcPoints.value.push(qubitPosition.value.clone())
+    }
     // without this triggerRef the qubitPosition line will not animate
     triggerRef(qubitPosition)
   }
@@ -199,7 +215,7 @@ onLoop(({ delta }) => {
     />
   </div>
   <div id="speed-controls">
-    <AnimationSettings :disabled="currentGate !== null" v-model="animationDuration" />
+    <AnimationSettings :disabled="currentGate !== null" v-model="config" />
   </div>
 </template>
 
