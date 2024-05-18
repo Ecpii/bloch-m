@@ -1,7 +1,7 @@
 <script setup>
-const duration = defineModel()
+const config = defineModel()
+const { disabled } = defineProps(['disabled'])
 function formatDuration(duration) {
-  console.log('typeof duration', typeof duration)
   let durationMs = parseFloat(duration)
   if (durationMs < 1) {
     return `${durationMs * 1000} ms`
@@ -11,18 +11,43 @@ function formatDuration(duration) {
 }
 </script>
 <template>
-  <label for="duration">Animation Duration - {{ formatDuration(duration) }}</label> <br />
-  <input
-    id="duration"
-    name="duration"
-    type="range"
-    min="0.1"
-    max="2"
-    step="0.1"
-    v-model="duration"
-  />
+  <div id="container">
+    <div class="checkbox-container">
+      <label for="axes-helpers">Show qubit arc</label>
+      <input id="axes-helpers" type="checkbox" v-model="config.showRotationArc" />
+    </div>
+    <div class="checkbox-container">
+      <label for="axes-helpers">Show axes during rotation</label>
+      <input id="axes-helpers" type="checkbox" v-model="config.showAxesHelpers" />
+    </div>
+    <div>
+      <label for="duration"
+        >Animation Duration - {{ formatDuration(config.animationDuration) }}</label
+      >
+      <br />
+      <input
+        id="duration"
+        name="duration"
+        type="range"
+        min="0.1"
+        max="2"
+        step="0.1"
+        v-model="config.animationDuration"
+        :disabled
+      />
+    </div>
+  </div>
 </template>
 <style scoped>
+#container {
+  display: flex;
+  flex-direction: column;
+}
+.checkbox-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
 /* from https://range-input-css.netlify.app/ */
 /*********** Baseline, reset styles ***********/
 input[type='range'] {
@@ -36,6 +61,10 @@ input[type='range'] {
 /* Removes default focus */
 input[type='range']:focus {
   outline: none;
+}
+
+input[type='range']:disabled {
+  opacity: 0.5;
 }
 
 /******** Chrome, Safari, Opera and Edge Chromium styles ********/

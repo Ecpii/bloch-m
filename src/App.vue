@@ -1,8 +1,8 @@
 <script setup>
-import { computed, shallowRef, triggerRef } from 'vue'
+import { computed, ref, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
-import { Line2, OrbitControls, Sphere } from '@tresjs/cientos'
-import { Vector3 } from 'three'
+import { Line2, OrbitControls, Sphere, Stats, Sparkles } from '@tresjs/cientos'
+import { Vector3, BufferGeometry, Line, LineBasicMaterial, Object3D, Euler } from 'three'
 import {
   GATES,
   calculateStatevector,
@@ -17,14 +17,23 @@ import StateDisplay from './components/StateDisplay.vue'
 import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
 import AnimationSettings from './components/AnimationSettings.vue'
+Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system
 
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
 const hoveredGate = shallowRef(null)
-const animationDuration = shallowRef(0.4)
+const config = ref({
+  animationDuration: 1,
+  showAxesHelpers: false,
+  showRotationArc: true
+})
+const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
+const sphereRef = shallowRef(null) // ref to the bloch sphere
+const pointRef = shallowRef(null) // point on end of the qubit line
+const arcPoints = ref([])
 const { onLoop } = useRenderLoop()
 
-function handlePointerDown(intersection) {
+function handleTresPointerDown(intersection) {
   qubitPosition.value = intersection.point
 }
 function setZeroState() {
@@ -54,24 +63,37 @@ function handleRotationGate(key, axis, angle) {
   newGate.rotation = angle
   fireGate(newGate)
 }
-
+function createAxisCopies() {
+  axesGuideRef.value.visible = true
+}
+function removeAxisCopies() {
+  axesGuideRef.value.visible = false
+  axesGuideRef.value.setRotationFromEuler(new Euler()) // reset rotation
+}
 function fireGate(gate) {
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, gate)
+  if (config.value.showAxesHelpers) {
+    createAxisCopies()
+  }
+  arcPoints.value = []
   currentGate.value = gate
   setTimeout(() => {
-    currentGate.value = null
     setQubitStatevector(endStatevector)
-  }, animationDuration.value * 1000)
+    currentGate.value = null
+    setTimeout(() => {
+      if (currentGate.value === null) {
+        removeAxisCopies()
+      }
+    }, 500)
+  }, config.value.animationDuration * 1000)
 }
 function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
 }
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
-const qubitLinePoints = computed(() => {
-  return [new Vector3(0, 0, 0), qubitPosition.value]
-})
+const qubitLinePoints = computed(() => [new Vector3(0, 0, 0), qubitPosition.value])
 const rotationAxis = computed(
   () =>
     currentGate?.value?.axis ??
@@ -79,10 +101,30 @@ const rotationAxis = computed(
   // changing the coordinates of the line from the origin to whatever points are needed
   // seems kinda hacky, but conditionally rendering the Line2 seems to cause issues
 )
+const rotationArc = computed(() => {
+  if (!config.value.showRotationArc || !arcPoints.value.length) {
+    return new Line()
+  }
+  const material = new LineBasicMaterial({ color: 0xcfb805, linewidth: 3 })
+  const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
+  return new Line(geometry, material)
+})
+
 onLoop(({ delta }) => {
   if (currentGate.value !== null) {
-    const angle = (delta / animationDuration.value) * currentGate.value.rotation
+    const angle = (delta / config.value.animationDuration) * currentGate.value.rotation
     qubitPosition.value.applyAxisAngle(currentGate.value.axis[0], angle)
+    sphereRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
+    // for some reason the point will not update its own position without this line
+    pointRef.value.position.copy(qubitPosition.value)
+
+    if (config.value.showAxesHelpers) {
+      axesGuideRef.value.rotateOnWorldAxis(currentGate.value.axis[0], angle)
+    }
+    if (config.value.showRotationArc) {
+      // store points we've traced on this rotation
+      arcPoints.value.push(qubitPosition.value.clone())
+    }
     // without this triggerRef the qubitPosition line will not animate
     triggerRef(qubitPosition)
   }
@@ -98,20 +140,60 @@ onLoop(({ delta }) => {
         :look-at="[0, 0, 0]"
         :near="0.1"
         :far="100"
+        ref="cameraRef"
       />
-      <OrbitControls :enable-zoom="false" />
+      <Stats />
+
+      <OrbitControls />
 
       <AxesLines />
-      <Suspense>
-        <AxesLabels />
-      </Suspense>
+      <AxesLabels />
 
-      <TresMesh :position="[0, 0, 0]" @pointer-down="handlePointerDown">
-        <TresSphereGeometry :args="[1, 64, 32]" />
-        <TresMeshBasicMaterial color="#7b97f9" :transparent="true" :opacity="0.2" />
+      <TresGroup ref="axesGuideRef" :up="[0, 0, 1]" :visible="false">
+        <!-- <TresAxesHelper /> -->
+        <Line2
+          :points="[
+            [0, 0, -1],
+            [0, 0, 1]
+          ]"
+          color="#7b97f9"
+          :line-width="3"
+        />
+        <Line2
+          :points="[
+            [0, -1, 0],
+            [0, 1, 0]
+          ]"
+          color="#7b97f9"
+          :line-width="3"
+        />
+        <Line2
+          :points="[
+            [-1, 0, 0],
+            [1, 0, 0]
+          ]"
+          color="#7b97f9"
+          :line-width="3"
+        />
+      </TresGroup>
+
+      <primitive :object="rotationArc" />
+      <!-- i dont know why neither of these below solutions work and i have to use a primitive -->
+      <!-- <Line2 :points="arcPoints" color="#cfb805" :line-width="3" v-if="arcPoints.length !== 0" /> -->
+      <!-- <TresLine>
+        <TresBufferGeometry :set-from-points="[arcPoints]" />
+        <TresLineBasicMaterial color="#cfb805" />
+      </TresLine> -->
+
+      <TresMesh :position="[0, 0, 0]" @pointer-down="handleTresPointerDown" ref="sphereRef">
+        <TresSphereGeometry :args="[1, 64, 64]" />
+        <TresMeshBasicMaterial color="#7995f9" :transparent="true" :opacity="0.25" />
       </TresMesh>
 
-      <Sphere :args="[0.015]" :position="qubitPosition" color="#cfb805" />
+      <TresMesh :position="qubitPosition" ref="pointRef">
+        <TresSphereGeometry :args="[0.015]" />
+        <TresMeshBasicMaterial color="#cfb805" />
+      </TresMesh>
       <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
       <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
     </TresCanvas>
@@ -133,7 +215,7 @@ onLoop(({ delta }) => {
     />
   </div>
   <div id="speed-controls">
-    <AnimationSettings v-model="animationDuration" />
+    <AnimationSettings :disabled="currentGate !== null" v-model="config" />
   </div>
 </template>
 
