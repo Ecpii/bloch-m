@@ -28,9 +28,11 @@ const config = ref({
   showAxesHelpers: false,
   showRotationArc: true
 })
-const creatingCustomGate = shallowRef(null)
+const creatingCustomGate = shallowRef(false)
 const customGateState = ref({
-  endPosition: new Vector3(0, 0, 1),
+  startPosition: new Vector3(0, 0, 1),
+  endPosition: new Vector3(0, 0, -1),
+  selecting: null,
   precision: 8 // todo: figure out what a good precision is
 })
 
