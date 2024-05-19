@@ -32,7 +32,7 @@ const creatingCustomGate = shallowRef(false)
 const customGateState = ref({
   startPosition: new Vector3(0, 0, 1),
   endPosition: new Vector3(0, 0, -1),
-  selecting: 'start',
+  selecting: 'startPosition',
   precision: 8 // todo: figure out what a good precision is
 })
 
@@ -44,6 +44,9 @@ const { onLoop } = useRenderLoop()
 
 function handleTresPointerDown(intersection) {
   qubitPosition.value = intersection.point
+  if (creatingCustomGate.value) {
+    customGateState.value[customGateState.value.selecting] = intersection.point
+  }
 }
 function setState(stateName) {
   if (stateName === '0') {
@@ -81,7 +84,7 @@ function handleCustomGate(action, ...args) {
   } else if (action === 'select') {
     const newSelection = args[0]
     customGateState.value.selecting = newSelection
-    qubitPosition.value = customGateState.value[newSelection + 'Position']
+    qubitPosition.value = customGateState.value[newSelection]
   }
 }
 function createAxisCopies() {
@@ -130,12 +133,12 @@ const rotationArc = computed(() => {
   const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
   return new Line(geometry, material)
 })
-
+// for creating custom gates, highlights the qubit that is not currently being set
 const secondaryQubitLinePoints = computed(() => {
   if (!creatingCustomGate.value) {
     return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
   }
-  return customGateState.value.selecting === 'start'
+  return customGateState.value.selecting === 'startPosition'
     ? [new Vector3(0, 0, 0), customGateState.value.endPosition]
     : [new Vector3(0, 0, 0), customGateState.value.startPosition]
 })

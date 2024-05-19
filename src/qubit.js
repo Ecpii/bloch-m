@@ -358,7 +358,7 @@ export function createQubitStatevectorTex(qubitPosition, qubitName) {
       ? '0.00'
       : phase.toFixed(2) === '0.00'
         ? oneAmplitude.toFixed(2)
-        : `${oneAmplitude}e^{${phase}i}`
+        : `${oneAmplitude.toFixed(2)}e^{${phase.toFixed(2)}i}`
   return `|${qubitName}\\rangle =
   \\begin{bmatrix}
     ${statevector[0].toFixed(2)} \\\\ ${oneComponentTex}
