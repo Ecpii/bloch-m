@@ -1,4 +1,7 @@
 <script setup>
+import { createQubitStatevectorTex } from '@/qubit'
+import KatexDisplay from './KatexDisplay.vue'
+
 const customGateState = defineModel()
 defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
 </script>
@@ -6,6 +9,7 @@ defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
   <div id="parameters">
     <div>Start state |α⟩</div>
     <div>{{ customGateState.startPosition }}</div>
+    <KatexDisplay :tex="createQubitStatevectorTex(customGateState.startPosition, 'α')" />
     <button
       @click="customGateState.selecting = 'start'"
       :class="{ active: customGateState.selecting === 'start' }"
@@ -14,6 +18,7 @@ defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
     </button>
     <div>End state |β⟩</div>
     <div>{{ customGateState.endPosition }}</div>
+    <KatexDisplay :tex="createQubitStatevectorTex(customGateState.endPosition, 'β')" />
     <button
       @click="customGateState.selecting = 'end'"
       :class="{ active: customGateState.selecting === 'end' }"

@@ -216,7 +216,7 @@ export const GATES = {
   'ry-': {
     axis: [new Vector3(0, 1, 0), new Vector3(0, -1, 0)],
     name: 'Ry (-θ) Gate',
-    description: 'Parameterized gate that rotates -θ radians around the y-axis.',
+    description: 'createQubitStatevectorTex',
     matrixTex: `Ry(\\theta) = \\begin{bmatrix}
     \\cos\\left(-\\frac{\\theta}{2}\\right) & -\\sin(-\\frac{\\theta}{2}) \\\\
     \\sin(-\\frac{\\theta}{2}) & \\cos(-\\frac{\\theta}{2})
@@ -317,6 +317,7 @@ function normalizeStatevector(statevector) {
   /**
    * Returns statevector with real zero component and phase encoded on one component.
    * @param statevector math.matrix object of size 2.
+   * @return js array of size 2 [number, math.complex]
    */
   // convoluted way to get the first element because of mathjs
   const zero = subset(statevector, index(0))
@@ -347,4 +348,20 @@ export function generateRotationMatrix(axis, angle) {
       [0, exp(multiply(complex(0, 1), angle / 2))]
     ])
   }
+}
+
+export function createQubitStatevectorTex(qubitPosition, qubitName) {
+  const statevector = calculateStatevector(qubitPosition)
+  const { r: oneAmplitude, phi: phase } = statevector[1].toPolar()
+  const oneComponentTex =
+    oneAmplitude.toFixed(2) === '0.00'
+      ? '0.00'
+      : phase.toFixed(2) === '0.00'
+        ? oneAmplitude.toFixed(2)
+        : `${oneAmplitude}e^{${phase}i}`
+  return `|${qubitName}\\rangle =
+  \\begin{bmatrix}
+    ${statevector[0].toFixed(2)} \\\\ ${oneComponentTex}
+  \\end{bmatrix}
+  `
 }
