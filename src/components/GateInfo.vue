@@ -1,8 +1,8 @@
 <script setup>
+import KatexDisplay from './KatexDisplay.vue'
+import KatexInline from './KatexInline.vue'
+
 const { gate } = defineProps(['gate'])
-function renderKatex(input) {
-  return katex.renderToString(input)
-}
 </script>
 <template>
   <template v-if="!gate">
@@ -18,13 +18,13 @@ function renderKatex(input) {
     {{ gate.description }}
     <template v-if="gate.matrixTex">
       <h2>Matrix</h2>
-      <div v-html="renderKatex(gate.matrixTex)" />
+      <KatexDisplay :tex="gate.matrixTex" />
     </template>
     <template v-if="gate.eigenstates && gate.eigenstates?.len !== 0">
       <h2>Eigenstates</h2>
       <ul>
         <li v-for="({ state, value }, index) in gate.eigenstates" :key="index">
-          <span v-html="renderKatex(state)" /> with eigenvalue <span v-html="renderKatex(value)" />
+          <KatexInline :tex="state" /> with eigenvalue <KatexInline :tex="value" />
         </li>
       </ul>
     </template>
