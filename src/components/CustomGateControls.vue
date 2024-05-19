@@ -38,12 +38,16 @@ defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
   <div id="controls" @mouseleave="$emit('gate-unhover')">
     <div class="span-2">
       <hr />
+      <button id="custom-gate">Calculate</button>
+    </div>
+    <div class="span-2">
+      <hr />
       <button
         id="custom-gate"
         @click="$emit('custom-gate', 'deactivate')"
         @mouseover="$emit('gate-hover', 'standard')"
       >
-        Standard
+        Basic Gates
       </button>
     </div>
   </div>

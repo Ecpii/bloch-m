@@ -14,6 +14,7 @@ import {
 import GateControls from './components/GateControls.vue'
 import CustomGateControls from './components/CustomGateControls.vue'
 import GateInfo from './components/GateInfo.vue'
+import CustomGateInstructions from './components/CustomGateInstructions.vue'
 import StateDisplay from './components/StateDisplay.vue'
 import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
@@ -254,7 +255,8 @@ onLoop(({ delta }) => {
     />
   </div>
   <div id="gate-info-container">
-    <GateInfo :gate="hoveredGate" />
+    <GateInfo :gate="hoveredGate" v-if="!creatingCustomGate" />
+    <CustomGateInstructions v-else />
   </div>
   <div id="animation-settings">
     <AnimationSettings :disabled="currentGate !== null" v-model="config" />
