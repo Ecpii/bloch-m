@@ -32,7 +32,7 @@ const creatingCustomGate = shallowRef(false)
 const customGateState = ref({
   startPosition: new Vector3(0, 0, 1),
   endPosition: new Vector3(0, 0, -1),
-  selecting: null,
+  selecting: 'start',
   precision: 8 // todo: figure out what a good precision is
 })
 
@@ -73,11 +73,15 @@ function handleRotationGate(key, axis, angle) {
   newGate.rotation = angle
   fireGate(newGate)
 }
-function handleCustomGate(action) {
+function handleCustomGate(action, ...args) {
   if (action === 'activate') {
     creatingCustomGate.value = true
   } else if (action === 'deactivate') {
     creatingCustomGate.value = false
+  } else if (action === 'select') {
+    const newSelection = args[0]
+    customGateState.value.selecting = newSelection
+    qubitPosition.value = customGateState.value[newSelection + 'Position']
   }
 }
 function createAxisCopies() {
@@ -125,6 +129,15 @@ const rotationArc = computed(() => {
   const material = new LineBasicMaterial({ color: 0xcfb805, linewidth: 3 })
   const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
   return new Line(geometry, material)
+})
+
+const secondaryQubitLinePoints = computed(() => {
+  if (!creatingCustomGate.value) {
+    return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
+  }
+  return customGateState.value.selecting === 'start'
+    ? [new Vector3(0, 0, 0), customGateState.value.endPosition]
+    : [new Vector3(0, 0, 0), customGateState.value.startPosition]
 })
 
 onLoop(({ delta }) => {
@@ -211,6 +224,7 @@ onLoop(({ delta }) => {
         <TresSphereGeometry :args="[0.015]" />
         <TresMeshBasicMaterial color="#cfb805" />
       </TresMesh>
+      <Line2 :points="secondaryQubitLinePoints" color="#7b97f9" :line-width="5" />
       <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
       <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
     </TresCanvas>

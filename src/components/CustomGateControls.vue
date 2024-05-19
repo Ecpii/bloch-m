@@ -11,7 +11,7 @@ defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
     <div>{{ customGateState.startPosition }}</div>
     <KatexDisplay :tex="createQubitStatevectorTex(customGateState.startPosition, 'α')" />
     <button
-      @click="customGateState.selecting = 'start'"
+      @click="$emit('custom-gate', 'select', 'start')"
       :class="{ active: customGateState.selecting === 'start' }"
     >
       Set |α⟩
@@ -20,7 +20,7 @@ defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
     <div>{{ customGateState.endPosition }}</div>
     <KatexDisplay :tex="createQubitStatevectorTex(customGateState.endPosition, 'β')" />
     <button
-      @click="customGateState.selecting = 'end'"
+      @click="$emit('custom-gate', 'select', 'end')"
       :class="{ active: customGateState.selecting === 'end' }"
     >
       Set |β⟩
