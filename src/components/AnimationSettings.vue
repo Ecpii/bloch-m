@@ -39,6 +39,9 @@ function formatDuration(duration) {
   </div>
 </template>
 <style scoped>
+input[type='range'] {
+  width: min(20rem, calc(100% - 1rem));
+}
 #container {
   display: flex;
   flex-direction: column;
@@ -47,69 +50,5 @@ function formatDuration(duration) {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-}
-/* from https://range-input-css.netlify.app/ */
-/*********** Baseline, reset styles ***********/
-input[type='range'] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-  width: min(20rem, calc(100% - 1rem));
-}
-
-/* Removes default focus */
-input[type='range']:focus {
-  outline: none;
-}
-
-input[type='range']:disabled {
-  opacity: 0.5;
-}
-
-/******** Chrome, Safari, Opera and Edge Chromium styles ********/
-/* slider track */
-input[type='range']::-webkit-slider-runnable-track {
-  background-color: #c9d9fd;
-  border-radius: 0rem;
-  height: 0.5rem;
-}
-
-/* slider thumb */
-input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Override default look */
-  appearance: none;
-  margin-top: -4px; /* Centers thumb on the track */
-  background-color: #7995f9;
-  border-radius: 0rem;
-  height: 1rem;
-  width: 1rem;
-}
-
-input[type='range']:focus::-webkit-slider-thumb {
-  outline: 3px solid #7995f9;
-  outline-offset: 0.125rem;
-}
-
-/*********** Firefox styles ***********/
-/* slider track */
-input[type='range']::-moz-range-track {
-  background-color: #c9d9fd;
-  border-radius: 0rem;
-  height: 0.5rem;
-}
-
-/* slider thumb */
-input[type='range']::-moz-range-thumb {
-  background-color: #7995f9;
-  border: none; /*Removes extra border that FF applies*/
-  border-radius: 0rem;
-  height: 1rem;
-  width: 1rem;
-}
-
-input[type='range']:focus::-moz-range-thumb {
-  outline: 3px solid #7995f9;
-  outline-offset: 0.125rem;
 }
 </style>

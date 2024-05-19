@@ -29,7 +29,7 @@ const config = ref({
   showRotationArc: true
 })
 const creatingCustomGate = shallowRef(null)
-const customGateState = shallowRef({
+const customGateState = ref({
   endPosition: new Vector3(0, 0, 1),
   precision: 8 // todo: figure out what a good precision is
 })
@@ -228,6 +228,7 @@ onLoop(({ delta }) => {
     />
     <CustomGateControls
       v-else
+      v-model="customGateState"
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
       @custom-gate="handleCustomGate"
