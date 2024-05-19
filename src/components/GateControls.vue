@@ -1,6 +1,6 @@
 <script setup>
 import { shallowRef } from 'vue'
-defineEmits(['set-state', 'gate', 'hover-gate', 'unhover-gate', 'rotation-gate'])
+defineEmits(['set-state', 'gate', 'gate-hover', 'gate-unhover', 'rotation-gate', 'custom-gate'])
 const GATE_BUTTONS = [
   { key: 'x', class: 'pauli', labelHTML: 'X' },
   { key: 's', class: 's', labelHTML: 'S' },
@@ -35,7 +35,7 @@ function getAngle(fraction, isPositive) {
 }
 </script>
 <template>
-  <div id="controls" @mouseleave="$emit('unhover-gate')">
+  <div id="controls" @mouseleave="$emit('gate-unhover')">
     <button class="reset" @click="$emit('set-state', '0')">|0⟩</button>
     <button class="reset" @click="$emit('set-state', '1')">|1⟩</button>
     <button
@@ -43,10 +43,10 @@ function getAngle(fraction, isPositive) {
       :class="gate.class"
       :key="gate.key"
       @click="$emit('gate', gate.key)"
-      @mouseover="$emit('hover-gate', gate.key)"
+      @mouseover="$emit('gate-hover', gate.key)"
       v-html="gate.labelHTML"
     />
-    <div id="select-theta">
+    <div class="span-2" id="select-theta">
       <hr />
       θ =
       <select id="theta-select" v-model="theta">
@@ -61,73 +61,24 @@ function getAngle(fraction, isPositive) {
       class="rotation"
       :key="gate.key"
       @click="$emit('rotation-gate', gate.key, gate.axis, getAngle(theta, gate.isPositive))"
-      @mouseover="$emit('hover-gate', gate.key)"
+      @mouseover="$emit('gate-hover', gate.key)"
     >
       R{{ gate.axis }}<br />
       <span style="font-size: 1rem">{{ gate.angle }}</span>
     </button>
+    <div class="span-2">
+      <hr />
+      <button
+        id="custom-gate"
+        @click="$emit('custom-gate', 'activate')"
+        @mouseover="$emit('gate-hover', 'custom')"
+      >
+        Custom Gate
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped>
-button {
-  border-radius: 0;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  font-family: inherit;
-  color: var(--background);
-  font-size: 1.5rem;
-  transition: all 0.2s linear;
-}
-button.reset {
-  background: transparent;
-  color: var(--primary);
-}
-button.pauli {
-  background: var(--primary);
-}
-button.h {
-  background: var(--accent);
-}
-button.s {
-  background: var(--purple);
-}
-button.t {
-  background: var(--green);
-}
-button.rotation {
-  background: var(--orange);
-  line-height: 1.25rem;
-}
-button:hover {
-  opacity: 0.6;
-}
-button.reset:hover {
-  opacity: 1;
-  background: var(--secondary);
-}
-#controls {
-  display: grid;
-  grid-template-columns: 4rem 4rem;
-  /* grid-template-rows: repeat(9, 4rem); */
-  grid-auto-rows: 4rem;
-  gap: 1rem;
-}
-#select-theta {
-  grid-column: 1 / span 2;
-  font-size: 1.25rem;
-  text-align: center;
-  align-self: center;
-}
-#select-theta hr {
-  margin-bottom: 1rem;
-}
-#select-theta select {
-  font-size: inherit;
-  font-family: inherit;
-  border: none;
-  background: inherit;
-  color: var(--primary);
-}
+@import '../assets/controls.css';
 </style>

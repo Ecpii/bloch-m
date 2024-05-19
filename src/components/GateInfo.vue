@@ -16,14 +16,18 @@ function renderKatex(input) {
   <template v-else>
     <h1>{{ gate.name }}</h1>
     {{ gate.description }}
-    <h2>Matrix</h2>
-    <div v-html="renderKatex(gate.matrixTex)" />
-    <h2>Eigenstates</h2>
-    <ul>
-      <li v-for="({ state, value }, index) in gate.eigenstates" :key="index">
-        <span v-html="renderKatex(state)" /> with eigenvalue <span v-html="renderKatex(value)" />
-      </li>
-    </ul>
+    <template v-if="gate.matrixTex">
+      <h2>Matrix</h2>
+      <div v-html="renderKatex(gate.matrixTex)" />
+    </template>
+    <template v-if="gate.eigenstates && gate.eigenstates?.len !== 0">
+      <h2>Eigenstates</h2>
+      <ul>
+        <li v-for="({ state, value }, index) in gate.eigenstates" :key="index">
+          <span v-html="renderKatex(state)" /> with eigenvalue <span v-html="renderKatex(value)" />
+        </li>
+      </ul>
+    </template>
   </template>
 </template>
 <style scoped>

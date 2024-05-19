@@ -257,6 +257,15 @@ export const GATES = {
       { state: '|0\\rangle', value: 'e^{\\theta/2i}' },
       { state: '|1\\rangle', value: 'e^{-\\theta/2i}' }
     ]
+  },
+  custom: {
+    name: 'Custom Gate',
+    description:
+      'Specify a custom gate through two points and a sequence of H and T gates will be used to approximate the rotation.'
+  },
+  standard: {
+    name: 'Standard Gates',
+    description: 'Return to the predefined gates.'
   }
 }
 export function statevectorToProbabilities(statevector) {

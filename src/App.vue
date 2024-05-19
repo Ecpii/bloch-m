@@ -12,12 +12,13 @@ import {
 } from './qubit'
 
 import GateControls from './components/GateControls.vue'
+import CustomGateControls from './components/CustomGateControls.vue'
 import GateInfo from './components/GateInfo.vue'
 import StateDisplay from './components/StateDisplay.vue'
 import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
 import AnimationSettings from './components/AnimationSettings.vue'
-Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system
+Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system since threejs is default y-up
 
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
@@ -27,6 +28,12 @@ const config = ref({
   showAxesHelpers: false,
   showRotationArc: true
 })
+const creatingCustomGate = shallowRef(null)
+const customGateState = shallowRef({
+  endPosition: new Vector3(0, 0, 1),
+  precision: 8 // todo: figure out what a good precision is
+})
+
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
@@ -43,10 +50,10 @@ function setState(stateName) {
     qubitPosition.value = new Vector3(0, 0, -1)
   }
 }
-function handleHoverGate(gateName) {
+function handleGateHover(gateName) {
   hoveredGate.value = GATES[gateName]
 }
-function handleUnhoverGate() {
+function handleGateUnhover() {
   hoveredGate.value = null
 }
 function handleGate(gateName) {
@@ -63,6 +70,13 @@ function handleRotationGate(key, axis, angle) {
   newGate.matrix = generateRotationMatrix(axis, angle)
   newGate.rotation = angle
   fireGate(newGate)
+}
+function handleCustomGate(action) {
+  if (action === 'activate') {
+    creatingCustomGate.value = true
+  } else if (action === 'deactivate') {
+    creatingCustomGate.value = false
+  }
 }
 function createAxisCopies() {
   axesGuideRef.value.visible = true
@@ -145,7 +159,7 @@ onLoop(({ delta }) => {
       />
       <Stats />
 
-      <OrbitControls />
+      <OrbitControls :enable-pan="false" />
 
       <AxesLines />
       <AxesLabels />
@@ -204,11 +218,19 @@ onLoop(({ delta }) => {
   </div>
   <div id="controls-container">
     <GateControls
+      v-if="!creatingCustomGate"
       @set-state="setState"
       @gate="handleGate"
       @rotation-gate="handleRotationGate"
-      @hover-gate="handleHoverGate"
-      @unhover-gate="handleUnhoverGate"
+      @gate-hover="handleGateHover"
+      @gate-unhover="handleGateUnhover"
+      @custom-gate="handleCustomGate"
+    />
+    <CustomGateControls
+      v-else
+      @gate-hover="handleGateHover"
+      @gate-unhover="handleGateUnhover"
+      @custom-gate="handleCustomGate"
     />
   </div>
   <div id="gate-info-container">
