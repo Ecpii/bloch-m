@@ -1,9 +1,13 @@
 <script setup>
 import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
+import { solovayKitaev } from '@/solovayKitaev'
 
 const customGateState = defineModel()
 defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
+function calculateCustomGate() {
+  solovayKitaev([], 0)
+}
 </script>
 <template>
   <div id="parameters">
@@ -38,7 +42,7 @@ defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
   <div id="controls" @mouseleave="$emit('gate-unhover')">
     <div class="span-2">
       <hr />
-      <button id="custom-gate">Calculate</button>
+      <button id="custom-gate" @click="calculateCustomGate">Calculate</button>
     </div>
     <div class="span-2">
       <hr />
