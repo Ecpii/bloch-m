@@ -1,3 +1,8 @@
+/**
+ * The Solovay-Kitaev algorithm and functions needed to run it are in this file.
+ * Much of the code is taken from Qiskit's implementation of the algorithm:
+ * https://github.com/Qiskit/qiskit/blob/stable/1.1/qiskit/synthesis/discrete_basis/solovay_kitaev.py#L201
+ */
 import {
   ctranspose,
   matrix,
@@ -6,7 +11,6 @@ import {
   subtract,
   multiply,
   norm,
-  inv,
   acos,
   trace,
   asin,
@@ -19,19 +23,17 @@ import {
   add,
   det
 } from 'mathjs'
+// this contains the precomputed sequences of h, t, and tdg gates with their so3 matrices
+// generated from a function in qiskit, see generate_basic_approximations_json.py
 import basicApproximations from './assets/basicApproximations.json'
-const GATE_MATRICES = {
-  h: divide(
-    matrix([
-      [1, 1],
-      [1, -1]
-    ]),
-    sqrt(2)
-  )
-}
+
+/**
+ * Class representing a sequence of gates.
+ */
 class GateSequence {
+  // list of the strings "h", "t", "tdg" in the order of the sequence
   gates = []
-  matrices = []
+  // so3 matrix representing the product of all the gates
   product = identity(3)
 
   static fromsu2Matrix(matrix) {
@@ -45,11 +47,13 @@ class GateSequence {
     return res
   }
 
+  /**
+   * Get the conjugate transpose of this GateSequence. Does not mutate original, and reorders
+   * gate names in generated GateSequence.
+   * @returns GateSequence representing the conjugate transpose of this GateSequence.
+   */
   adjoint() {
     const res = new GateSequence()
-    for (const matrix of this.matrices.toReversed()) {
-      res.matrix.push(inv(matrix))
-    }
     for (const gate of this.gates.toReversed()) {
       if (gate === 't') {
         res.gates.push('tdg')
@@ -62,14 +66,22 @@ class GateSequence {
     res.product = ctranspose(this.product)
     return res
   }
+  /**
+   * Computes the dot product of this GateSequence and the provided argument. Does not modify
+   * either GateSequence.
+   * @param {GateSequence} other GateSequence to compute the dot product with
+   * @returns new GateSequence representing dot product of the two sequences.
+   */
   dot(other) {
     const res = new GateSequence()
     res.gates = other.gates.concat(this.gates)
-    res.matrices = other.matrices.concat(this.matrices)
     res.product = dot(this.product, other.product)
     return res
   }
 
+  /**
+   * Removes gates that are inverses of each other and sequential in the gate sequence.
+   */
   clean() {
     let index = 0
     while (index < this.gates.length - 1) {
@@ -107,6 +119,15 @@ function convertSu2ToSo3(mat) {
   ])
 }
 
+/**
+ * Finds the Solovay-Kitaev approximation (using basis gates H, T, and T dagger)
+ * of the given 2x2 matrix.
+ * @param {matrix} targetMatrix 2x2 matrix in U(2), should be valid operation on a qubit
+ * @param {*} n recursion depth
+ * @returns {GateSequence} object where the key "gates" gives a list of "h", "t", and "tdg"
+ * in the order created by the approximation, and "product" gives a 3x3 SO(3) matrix representing
+ * the product of these gates
+ */
 export function solovayKitaevFromU2(targetMatrix, n) {
   const phaseFactor = 1 / sqrt(det(targetMatrix))
   const inputSequence = GateSequence.fromsu2Matrix(multiply(phaseFactor, targetMatrix))
@@ -114,8 +135,15 @@ export function solovayKitaevFromU2(targetMatrix, n) {
 
   const resSequence = solovayKitaev(inputSequence, n)
   resSequence.clean()
+  return resSequence
 }
 
+/**
+ * The recursive function in the Solovay-Kitaev algorithm.
+ * @param {GateSequence} u The gate to be approximated
+ * @param {Number} n recursion depth
+ * @returns {GateSequence} Approximation of u
+ */
 function solovayKitaev(u, n) {
   if (n === 0) {
     return findClosestBasicApproximation(u)
@@ -131,21 +159,36 @@ function solovayKitaev(u, n) {
   return vApprox.dot(wApprox).dot(vApprox.adjoint()).dot(wApprox.adjoint()).dot(uApprox)
 }
 
+/**
+ * Finds the closest basic approximation to the given GateSequence by the Frobenius norm
+ * of the matrices' difference.
+ * @param {GateSequence} target Sequence to find the approximation for
+ * @returns {GateSequence} Sequence closest to target
+ */
 function findClosestBasicApproximation(target) {
   const targetMatrix = target.product
   let minLoss = Infinity
-  let minLossSequence
-  for (const sequence of basicApproximations) {
-    const sequenceMatrix = matrix(sequence.matrix)
+  let minLossApprox
+  for (const approx of basicApproximations) {
+    const sequenceMatrix = matrix(approx.matrix)
     const loss = norm(subtract(sequenceMatrix, targetMatrix), 'fro')
     if (loss < minLoss) {
       minLoss = loss
-      minLossSequence = sequence
+      minLossApprox = approx
     }
   }
+  const minLossSequence = GateSequence.fromso3Matrix(matrix(minLossApprox.matrix))
+  minLossSequence.gates = minLossApprox.names
   return minLossSequence
 }
 
+/**
+ * Creates an SO(3) matrix from the given parameters.
+ * Taken from https://www.mathworks.com/help/nav/ref/so3.html
+ * @param {string} axis "x" or "y"
+ * @param {Number} angle in radians
+ * @returns {Matrix} SO(3) representing +angle rotations around given axis
+ */
 function constructSO3FromAxisAngle(axis, angle) {
   if (axis === 'x') {
     return matrix([
@@ -162,6 +205,11 @@ function constructSO3FromAxisAngle(axis, angle) {
   }
 }
 
+/**
+ * Finds the rotation axis of an SO(3) matrix.
+ * @param {Matrix} so3Matrix SO(3) matrix to find the axis of
+ * @returns {Number[3]} Array in xyz order of the axis of rotation.
+ */
 function computeRotationAxis(so3Matrix) {
   const matrixTrace = trace(so3Matrix)
   const theta = acos((1 / 2) * (matrixTrace - 1))
@@ -176,6 +224,12 @@ function computeRotationAxis(so3Matrix) {
   }
 }
 
+/**
+ * Finds the SO(3) matrix to rotate from `from` to `to`.
+ * @param {Number[]} from unit vector of size 3
+ * @param {Number[]} to unit vector of size 3
+ * @returns {matrix}
+ */
 function computeRotationBetween(from, to) {
   const fromVec = from / norm(from, 'fro')
   const toVec = to / norm(to, 'fro')
@@ -186,6 +240,11 @@ function computeRotationBetween(from, to) {
   return divide(add(add(identity(3), crossProduct), crossDot), 1 + dotProduct)
 }
 
+/**
+ * Computes a balanced commutator decomposition as described in the papers.
+ * @param {matrix} so3Matrix SO(3) matrix to decompose.
+ * @returns {GateSequence[2]} v, w such that v w vdg wdg = U
+ */
 function balancedCommutatorDecomposition(so3Matrix) {
   // rotation angle of so3Matrix
   const angleTheta = acos((1 / 2) * (trace(so3Matrix) - 1))
