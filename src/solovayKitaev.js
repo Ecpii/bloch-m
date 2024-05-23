@@ -21,11 +21,22 @@ import {
   cross,
   identity,
   add,
-  det
+  det,
+  complex
 } from 'mathjs'
 // this contains the precomputed sequences of h, t, and tdg gates with their so3 matrices
 // generated from a function in qiskit, see generate_basic_approximations_json.py
-import basicApproximations from './assets/basicApproximations.json'
+import basicApproximations from './basicApproximations.json'
+
+export function test() {
+  const rx8Gate = matrix([
+    [0.92106099, complex(0, -0.38941834)],
+    [complex(0, -0.38941834), 0.92105099]
+  ])
+  console.log('det(rx8Gate)', det(rx8Gate))
+  const res = solovayKitaevFromU2(rx8Gate, 1)
+  console.log('res', res)
+}
 
 /**
  * Class representing a sequence of gates.
@@ -75,7 +86,7 @@ class GateSequence {
   dot(other) {
     const res = new GateSequence()
     res.gates = other.gates.concat(this.gates)
-    res.product = dot(this.product, other.product)
+    res.product = multiply(this.product, other.product)
     return res
   }
 
@@ -123,14 +134,15 @@ function convertSu2ToSo3(mat) {
  * Finds the Solovay-Kitaev approximation (using basis gates H, T, and T dagger)
  * of the given 2x2 matrix.
  * @param {matrix} targetMatrix 2x2 matrix in U(2), should be valid operation on a qubit
- * @param {*} n recursion depth
+ * @param {Number} n recursion depth
  * @returns {GateSequence} object where the key "gates" gives a list of "h", "t", and "tdg"
  * in the order created by the approximation, and "product" gives a 3x3 SO(3) matrix representing
  * the product of these gates
  */
 export function solovayKitaevFromU2(targetMatrix, n) {
-  const phaseFactor = 1 / sqrt(det(targetMatrix))
+  const phaseFactor = divide(1, sqrt(det(targetMatrix)))
   const inputSequence = GateSequence.fromsu2Matrix(multiply(phaseFactor, targetMatrix))
+  console.log('inputSequence.product', inputSequence.product)
   // const globalPhase = atan2(phaseFactor.im, phaseFactor.re)
 
   const resSequence = solovayKitaev(inputSequence, n)
@@ -151,7 +163,7 @@ function solovayKitaev(u, n) {
   const uApprox = solovayKitaev(u, n - 1)
   const delta = u.dot(uApprox.adjoint())
 
-  const [v, w] = balancedCommutatorDecomposition(delta)
+  const [v, w] = balancedCommutatorDecomposition(delta.product)
 
   const vApprox = solovayKitaev(v, n - 1)
   const wApprox = solovayKitaev(w, n - 1)
@@ -228,16 +240,29 @@ function computeRotationAxis(so3Matrix) {
  * Finds the SO(3) matrix to rotate from `from` to `to`.
  * @param {Number[]} from unit vector of size 3
  * @param {Number[]} to unit vector of size 3
- * @returns {matrix}
+ * @returns {Matrix}
  */
 function computeRotationBetween(from, to) {
-  const fromVec = from / norm(from, 'fro')
-  const toVec = to / norm(to, 'fro')
+  const fromVec = divide(from, norm(from, 'fro'))
+  const toVec = divide(to, norm(to, 'fro'))
 
   const dotProduct = dot(fromVec, toVec)
-  const crossProduct = cross(fromVec, toVec)
-  const crossDot = dot(crossProduct, crossProduct)
+  const crossProduct = crossProductMatrix(cross(fromVec, toVec))
+  const crossDot = multiply(crossProduct, crossProduct)
   return divide(add(add(identity(3), crossProduct), crossDot), 1 + dotProduct)
+}
+
+/**
+ * Computes cross product matrix from vector.
+ * @param {Number[3]} vec cross product vector
+ * @returns {Matrix} 3x3 matrix of the cross product.
+ */
+function crossProductMatrix(vec) {
+  return matrix([
+    [0, -1 * vec[2], vec[1]],
+    [vec[2], 0, -1 * vec[0]],
+    [-1 * vec[1], vec[0], 0]
+  ])
 }
 
 /**
@@ -249,7 +274,7 @@ function balancedCommutatorDecomposition(so3Matrix) {
   // rotation angle of so3Matrix
   const angleTheta = acos((1 / 2) * (trace(so3Matrix) - 1))
   // rotation angles for vTilde and wTilde
-  const anglePhi = 2 * asin(nthRoot(1 - cos(angleTheta / 2), 4) / nthRoot(2, 4))
+  const anglePhi = 2 * asin(nthRoot((1 - cos(angleTheta / 2)) / 2, 4))
   const vTilde = constructSO3FromAxisAngle('x', anglePhi)
   const wTilde = constructSO3FromAxisAngle('y', anglePhi)
 
@@ -267,8 +292,8 @@ function balancedCommutatorDecomposition(so3Matrix) {
   const simMatrix = computeRotationBetween(commutatorAxis, so3Axis)
   const simMatrixdg = ctranspose(simMatrix)
 
-  const v = dot(dot(simMatrix, vTilde), simMatrixdg)
-  const w = dot(dot(simMatrix, wTilde), simMatrixdg)
+  const v = multiply(multiply(simMatrix, vTilde), simMatrixdg)
+  const w = multiply(multiply(simMatrix, wTilde), simMatrixdg)
 
   return [GateSequence.fromso3Matrix(v), GateSequence.fromso3Matrix(w)]
 }

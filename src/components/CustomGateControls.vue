@@ -1,12 +1,12 @@
 <script setup>
 import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
-import { solovayKitaev } from '@/solovayKitaev'
+import { test } from '@/solovayKitaev'
 
 const customGateState = defineModel()
 defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
 function calculateCustomGate() {
-  solovayKitaev([], 0)
+  test()
 }
 </script>
 <template>
