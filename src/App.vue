@@ -143,7 +143,6 @@ onLoop(({ delta }) => {
         :far="100"
         ref="cameraRef"
       />
-      <Stats />
 
       <OrbitControls />
 
