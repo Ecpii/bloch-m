@@ -28,16 +28,6 @@ import {
 // generated from a function in qiskit, see generate_basic_approximations_json.py
 import basicApproximations from './basicApproximations.json'
 
-export function test() {
-  const rx8Gate = matrix([
-    [0.92106099, complex(0, -0.38941834)],
-    [complex(0, -0.38941834), 0.92105099]
-  ])
-  console.log('det(rx8Gate)', det(rx8Gate))
-  const res = solovayKitaevFromU2(rx8Gate, 1)
-  console.log('res', res)
-}
-
 /**
  * Class representing a sequence of gates.
  */
@@ -130,6 +120,36 @@ function convertSu2ToSo3(mat) {
   ])
 }
 
+export function computeSo3FromPoints(from, to) {
+  const fromVector = [from.x, from.y, from.z]
+  const toVector = [to.x, to.y, to.z]
+  const so3Matrix = computeRotationBetween(fromVector, toVector)
+  return so3Matrix
+}
+
+export function computeSo3TexFromPoints(from, to) {
+  const so3Matrix = computeSo3FromPoints(from, to)
+  return `
+  \\begin{bmatrix}
+  ${so3Matrix.get([0, 0]).toFixed(2)} & ${so3Matrix.get([0, 1]).toFixed(2)} & ${so3Matrix.get([0, 2]).toFixed(2)} \\\\
+  ${so3Matrix.get([1, 0]).toFixed(2)} & ${so3Matrix.get([1, 1]).toFixed(2)} & ${so3Matrix.get([1, 2]).toFixed(2)} \\\\ 
+  ${so3Matrix.get([2, 0]).toFixed(2)} & ${so3Matrix.get([2, 1]).toFixed(2)} & ${so3Matrix.get([2, 2]).toFixed(2)}
+  \\end{bmatrix}
+  `
+}
+
+export function solovayKitaevFromPoints(from, to, n) {
+  const so3Matrix = computeSo3FromPoints(from, to)
+  return solovayKitaevFromSo3(so3Matrix, n)
+}
+
+export function solovayKitaevFromSo3(so3Matrix, n) {
+  const inputSequence = GateSequence.fromso3Matrix(so3Matrix)
+  const resSequence = solovayKitaev(inputSequence, n)
+  resSequence.clean()
+  return resSequence
+}
+
 /**
  * Finds the Solovay-Kitaev approximation (using basis gates H, T, and T dagger)
  * of the given 2x2 matrix.
@@ -142,7 +162,6 @@ function convertSu2ToSo3(mat) {
 export function solovayKitaevFromU2(targetMatrix, n) {
   const phaseFactor = divide(1, sqrt(det(targetMatrix)))
   const inputSequence = GateSequence.fromsu2Matrix(multiply(phaseFactor, targetMatrix))
-  console.log('inputSequence.product', inputSequence.product)
   // const globalPhase = atan2(phaseFactor.im, phaseFactor.re)
 
   const resSequence = solovayKitaev(inputSequence, n)
@@ -249,7 +268,7 @@ function computeRotationBetween(from, to) {
   const dotProduct = dot(fromVec, toVec)
   const crossProduct = crossProductMatrix(cross(fromVec, toVec))
   const crossDot = multiply(crossProduct, crossProduct)
-  return divide(add(add(identity(3), crossProduct), crossDot), 1 + dotProduct)
+  return add(add(identity(3), crossProduct), divide(crossDot, 1 + dotProduct))
 }
 
 /**
@@ -272,7 +291,7 @@ function crossProductMatrix(vec) {
  */
 function balancedCommutatorDecomposition(so3Matrix) {
   // rotation angle of so3Matrix
-  const angleTheta = acos((1 / 2) * (trace(so3Matrix) - 1))
+  const angleTheta = acos((trace(so3Matrix) - 1) / 2)
   // rotation angles for vTilde and wTilde
   const anglePhi = 2 * asin(nthRoot((1 - cos(angleTheta / 2)) / 2, 4))
   const vTilde = constructSO3FromAxisAngle('x', anglePhi)

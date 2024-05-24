@@ -1,12 +1,20 @@
 <script setup>
 import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
-import { test } from '@/solovayKitaev'
+import { computeSo3TexFromPoints, solovayKitaevFromPoints } from '@/solovayKitaev'
 
 const customGateState = defineModel()
 defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
 function calculateCustomGate() {
-  test()
+  console.time('calculateCustomGate')
+  const res = solovayKitaevFromPoints(
+    // const res = computeSo3FromPoints(
+    customGateState.value.startPosition,
+    customGateState.value.endPosition,
+    customGateState.value.precision
+  )
+  console.timeEnd('calculateCustomGate')
+  console.log('res', res)
 }
 </script>
 <template>
@@ -17,6 +25,9 @@ function calculateCustomGate() {
     <!-- <div>End state |β⟩</div> -->
     <!-- <div>{{ customGateState.endPosition }}</div> -->
     <KatexDisplay :tex="createQubitStatevectorTex(customGateState.endPosition, 'β')" />
+    <!-- <KatexDisplay
+      :tex="computeSo3TexFromPoints(customGateState.startPosition, customGateState.endPosition)"
+    /> -->
     <button
       @click="$emit('custom-gate', 'select', 'startPosition')"
       :class="{ active: customGateState.selecting === 'startPosition' }"
@@ -34,7 +45,7 @@ function calculateCustomGate() {
       id="precision"
       type="range"
       min="1"
-      max="10"
+      max="8"
       step="1"
       v-model="customGateState.precision"
     />

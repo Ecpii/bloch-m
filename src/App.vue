@@ -34,7 +34,7 @@ const customGateState = ref({
   startPosition: new Vector3(0, 0, 1),
   endPosition: new Vector3(0, 0, -1),
   selecting: 'startPosition',
-  precision: 8 // todo: figure out what a good precision is
+  precision: 2 // todo: figure out what a good precision is
 })
 
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
