@@ -127,15 +127,18 @@ export function computeSo3FromPoints(from, to) {
   return so3Matrix
 }
 
-export function computeSo3TexFromPoints(from, to) {
-  const so3Matrix = computeSo3FromPoints(from, to)
+export function generateSo3Tex(so3Matrix, precision = 2) {
   return `
   \\begin{bmatrix}
-  ${so3Matrix.get([0, 0]).toFixed(2)} & ${so3Matrix.get([0, 1]).toFixed(2)} & ${so3Matrix.get([0, 2]).toFixed(2)} \\\\
-  ${so3Matrix.get([1, 0]).toFixed(2)} & ${so3Matrix.get([1, 1]).toFixed(2)} & ${so3Matrix.get([1, 2]).toFixed(2)} \\\\ 
-  ${so3Matrix.get([2, 0]).toFixed(2)} & ${so3Matrix.get([2, 1]).toFixed(2)} & ${so3Matrix.get([2, 2]).toFixed(2)}
+  ${so3Matrix.get([0, 0]).toFixed(precision)} & ${so3Matrix.get([0, 1]).toFixed(precision)} & ${so3Matrix.get([0, 2]).toFixed(precision)} \\\\
+  ${so3Matrix.get([1, 0]).toFixed(precision)} & ${so3Matrix.get([1, 1]).toFixed(precision)} & ${so3Matrix.get([1, 2]).toFixed(precision)} \\\\ 
+  ${so3Matrix.get([2, 0]).toFixed(precision)} & ${so3Matrix.get([2, 1]).toFixed(precision)} & ${so3Matrix.get([2, 2]).toFixed(precision)}
   \\end{bmatrix}
   `
+}
+
+export function computeSo3TexFromPoints(from, to) {
+  return generateSo3Tex(computeSo3FromPoints(from, to))
 }
 
 export function solovayKitaevFromPoints(from, to, n) {

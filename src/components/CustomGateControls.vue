@@ -3,7 +3,7 @@ import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
 
 const customGateState = defineModel()
-defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate'])
+defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate', 'page-switch'])
 </script>
 <template>
   <div id="parameters">

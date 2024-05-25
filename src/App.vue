@@ -10,7 +10,11 @@ import {
   calculateCoordinates,
   generateRotationMatrix
 } from './qubit'
-import { computeSo3TexFromPoints, solovayKitaevFromPoints } from '@/solovayKitaev'
+import {
+  computeSo3FromPoints,
+  computeSo3TexFromPoints,
+  solovayKitaevFromPoints
+} from '@/solovayKitaev'
 
 import GateControls from './components/GateControls.vue'
 import CustomGateControls from './components/CustomGateControls.vue'
@@ -87,14 +91,22 @@ function handleCustomStateSelect(newSelection) {
 }
 function handleCustomGateCalculate() {
   console.time('calculateCustomGate')
-  const res = solovayKitaevFromPoints(
+  const so3Matrix = computeSo3FromPoints(
+    customGateState.value.startPosition,
+    customGateState.value.endPosition
+  )
+  const solovayKitaev = solovayKitaevFromPoints(
     // const res = computeSo3FromPoints(
     customGateState.value.startPosition,
     customGateState.value.endPosition,
     customGateState.value.precision
   )
   console.timeEnd('calculateCustomGate')
-  console.log('res', res)
+  customGateState.value.results = {
+    originalSo3Matrix: so3Matrix,
+    solovayKitaev
+  }
+  console.log('res', solovayKitaev)
 }
 function createAxisCopies() {
   axesGuideRef.value.visible = true
@@ -266,7 +278,7 @@ onLoop(({ delta }) => {
   </div>
   <div id="gate-info-container">
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
-    <CustomGateInstructions v-else />
+    <CustomGateInstructions :state="customGateState" v-else />
   </div>
   <div id="animation-settings">
     <AnimationSettings :disabled="currentGate !== null" v-model="config" />
