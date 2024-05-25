@@ -1,6 +1,6 @@
 <script setup>
 import { shallowRef } from 'vue'
-defineEmits(['set-state', 'gate', 'gate-hover', 'gate-unhover', 'rotation-gate', 'custom-gate'])
+defineEmits(['set-state', 'gate', 'gate-hover', 'gate-unhover', 'rotation-gate', 'page-switch'])
 const GATE_BUTTONS = [
   { key: 'x', class: 'pauli', labelHTML: 'X' },
   { key: 's', class: 's', labelHTML: 'S' },
@@ -70,7 +70,7 @@ function getAngle(fraction, isPositive) {
       <hr />
       <button
         id="custom-gate"
-        @click="$emit('custom-gate', 'activate')"
+        @click="$emit('page-switch', 'customGate')"
         @mouseover="$emit('gate-hover', 'custom')"
       >
         Custom Gate

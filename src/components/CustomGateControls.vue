@@ -4,7 +4,7 @@ import KatexDisplay from './KatexDisplay.vue'
 import { computeSo3TexFromPoints, solovayKitaevFromPoints } from '@/solovayKitaev'
 
 const customGateState = defineModel()
-defineEmits(['gate-hover', 'gate-unhover', 'custom-gate'])
+defineEmits(['gate-hover', 'gate-unhover', 'state-select'])
 function calculateCustomGate() {
   console.time('calculateCustomGate')
   const res = solovayKitaevFromPoints(
@@ -29,13 +29,13 @@ function calculateCustomGate() {
       :tex="computeSo3TexFromPoints(customGateState.startPosition, customGateState.endPosition)"
     /> -->
     <button
-      @click="$emit('custom-gate', 'select', 'startPosition')"
+      @click="$emit('state-select', 'startPosition')"
       :class="{ active: customGateState.selecting === 'startPosition' }"
     >
       Set |α⟩
     </button>
     <button
-      @click="$emit('custom-gate', 'select', 'endPosition')"
+      @click="$emit('state-select', 'endPosition')"
       :class="{ active: customGateState.selecting === 'endPosition' }"
     >
       Set |β⟩
@@ -59,7 +59,7 @@ function calculateCustomGate() {
       <hr />
       <button
         id="custom-gate"
-        @click="$emit('custom-gate', 'deactivate')"
+        @click="$emit('page-switch', 'standard')"
         @mouseover="$emit('gate-hover', 'standard')"
       >
         Basic Gates

@@ -29,12 +29,12 @@ const config = ref({
   showAxesHelpers: false,
   showRotationArc: true
 })
-const creatingCustomGate = shallowRef(false)
+const page = shallowRef('standard')
 const customGateState = ref({
   startPosition: new Vector3(0, 0, 1),
   endPosition: new Vector3(0, 0, -1),
   selecting: 'startPosition',
-  precision: 2 // todo: figure out what a good precision is
+  precision: 2
 })
 
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
@@ -45,7 +45,7 @@ const { onLoop } = useRenderLoop()
 
 function handleTresPointerDown(intersection) {
   qubitPosition.value = intersection.point
-  if (creatingCustomGate.value) {
+  if (page.value === 'custom') {
     customGateState.value[customGateState.value.selecting] = intersection.point
   }
 }
@@ -77,16 +77,12 @@ function handleRotationGate(key, axis, angle) {
   newGate.rotation = angle
   fireGate(newGate)
 }
-function handleCustomGate(action, ...args) {
-  if (action === 'activate') {
-    creatingCustomGate.value = true
-  } else if (action === 'deactivate') {
-    creatingCustomGate.value = false
-  } else if (action === 'select') {
-    const newSelection = args[0]
-    customGateState.value.selecting = newSelection
-    qubitPosition.value = customGateState.value[newSelection]
-  }
+function handlePageSwitch(newPage) {
+  page.value = newPage
+}
+function handleCustomStateSelect(newSelection) {
+  customGateState.value.selecting = newSelection
+  qubitPosition.value = customGateState.value[newSelection]
 }
 function createAxisCopies() {
   axesGuideRef.value.visible = true
@@ -136,7 +132,7 @@ const rotationArc = computed(() => {
 })
 // for creating custom gates, highlights the qubit that is not currently being set
 const secondaryQubitLinePoints = computed(() => {
-  if (!creatingCustomGate.value) {
+  if (page.value === 'custom') {
     return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
   }
   return customGateState.value.selecting === 'startPosition'
@@ -238,24 +234,25 @@ onLoop(({ delta }) => {
   </div>
   <div id="controls-container">
     <GateControls
-      v-if="!creatingCustomGate"
+      v-if="page === 'standard'"
       @set-state="setState"
       @gate="handleGate"
       @rotation-gate="handleRotationGate"
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
-      @custom-gate="handleCustomGate"
+      @page-switch="handlePageSwitch"
     />
     <CustomGateControls
       v-else
       v-model="customGateState"
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
-      @custom-gate="handleCustomGate"
+      @page-switch="handlePageSwitch"
+      @state-select="handleCustomStateSelect"
     />
   </div>
   <div id="gate-info-container">
-    <GateInfo :gate="hoveredGate" v-if="!creatingCustomGate" />
+    <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
     <CustomGateInstructions v-else />
   </div>
   <div id="animation-settings">
