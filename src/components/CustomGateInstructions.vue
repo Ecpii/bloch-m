@@ -5,6 +5,21 @@ import { ref } from 'vue'
 
 const { state } = defineProps(['state'])
 const decimalPrecision = ref(2)
+
+function formatGates(gates) {
+  let res = ''
+  for (const gate of gates) {
+    if (gate === 'tdg') {
+      res = res.concat('T<sup>†</sup>')
+    } else if (gate === 't') {
+      res = res.concat('T')
+    } else {
+      res = res.concat('H')
+    }
+    res = res.concat(', ')
+  }
+  return res.slice(0, -2)
+}
 </script>
 <template>
   <template v-if="!state.results">
@@ -39,5 +54,15 @@ const decimalPrecision = ref(2)
     <KatexDisplay :tex="generateSo3Tex(state.results.originalSo3Matrix, decimalPrecision)" />
     <h2>Solovay–Kitaev Matrix</h2>
     <KatexDisplay :tex="generateSo3Tex(state.results.solovayKitaev.product, decimalPrecision)" />
+    <h2>Approximation Gates</h2>
+    <div class="gate-display" v-html="formatGates(state.results.solovayKitaev.gates)"></div>
   </template>
 </template>
+
+<style scoped>
+.gate-display {
+  overflow-x: scroll;
+  white-space: nowrap;
+  padding: 1rem;
+}
+</style>
