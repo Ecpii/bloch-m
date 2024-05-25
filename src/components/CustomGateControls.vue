@@ -1,21 +1,9 @@
 <script setup>
 import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
-import { computeSo3TexFromPoints, solovayKitaevFromPoints } from '@/solovayKitaev'
 
 const customGateState = defineModel()
-defineEmits(['gate-hover', 'gate-unhover', 'state-select'])
-function calculateCustomGate() {
-  console.time('calculateCustomGate')
-  const res = solovayKitaevFromPoints(
-    // const res = computeSo3FromPoints(
-    customGateState.value.startPosition,
-    customGateState.value.endPosition,
-    customGateState.value.precision
-  )
-  console.timeEnd('calculateCustomGate')
-  console.log('res', res)
-}
+defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate'])
 </script>
 <template>
   <div id="parameters">
@@ -53,7 +41,7 @@ function calculateCustomGate() {
   <div id="controls" @mouseleave="$emit('gate-unhover')">
     <div class="span-2">
       <hr />
-      <button id="custom-gate" @click="calculateCustomGate">Calculate</button>
+      <button id="custom-gate" @click="$emit('calculate')">Calculate</button>
     </div>
     <div class="span-2">
       <hr />

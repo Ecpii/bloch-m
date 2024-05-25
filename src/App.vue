@@ -10,6 +10,7 @@ import {
   calculateCoordinates,
   generateRotationMatrix
 } from './qubit'
+import { computeSo3TexFromPoints, solovayKitaevFromPoints } from '@/solovayKitaev'
 
 import GateControls from './components/GateControls.vue'
 import CustomGateControls from './components/CustomGateControls.vue'
@@ -45,7 +46,7 @@ const { onLoop } = useRenderLoop()
 
 function handleTresPointerDown(intersection) {
   qubitPosition.value = intersection.point
-  if (page.value === 'custom') {
+  if (page.value === 'customGate') {
     customGateState.value[customGateState.value.selecting] = intersection.point
   }
 }
@@ -83,6 +84,17 @@ function handlePageSwitch(newPage) {
 function handleCustomStateSelect(newSelection) {
   customGateState.value.selecting = newSelection
   qubitPosition.value = customGateState.value[newSelection]
+}
+function handleCustomGateCalculate() {
+  console.time('calculateCustomGate')
+  const res = solovayKitaevFromPoints(
+    // const res = computeSo3FromPoints(
+    customGateState.value.startPosition,
+    customGateState.value.endPosition,
+    customGateState.value.precision
+  )
+  console.timeEnd('calculateCustomGate')
+  console.log('res', res)
 }
 function createAxisCopies() {
   axesGuideRef.value.visible = true
@@ -249,6 +261,7 @@ onLoop(({ delta }) => {
       @gate-unhover="handleGateUnhover"
       @page-switch="handlePageSwitch"
       @state-select="handleCustomStateSelect"
+      @calculate="handleCustomGateCalculate"
     />
   </div>
   <div id="gate-info-container">
