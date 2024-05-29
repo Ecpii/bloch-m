@@ -1,14 +1,19 @@
 <script setup>
 import { generateSo3Tex } from '@/solovayKitaev'
-import KatexDisplay from './KatexDisplay.vue'
 import { ref, watchEffect } from 'vue'
+import CopyButton from './CopyButton.vue'
+import KatexDisplay from './KatexDisplay.vue'
 
 const props = defineProps(['state', 'sequenceIndex', 'flags'])
 const decimalPrecision = ref(2)
 const gateDisplay = ref(null)
 
 watchEffect(() => {
-  if (gateDisplay?.value?.children && props.sequenceIndex < gateDisplay.value.children.length) {
+  if (
+    gateDisplay?.value?.children &&
+    props.flags.simulating &&
+    props.sequenceIndex < gateDisplay.value.children.length
+  ) {
     gateDisplay.value.children[props.sequenceIndex].scrollIntoView({
       behavior: 'smooth',
       inline: 'start'
@@ -70,6 +75,7 @@ watchEffect(() => {
           >
         </div>
       </div>
+      <CopyButton display-text="hi" copy-text="bye" />
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the
