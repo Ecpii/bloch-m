@@ -3,8 +3,15 @@ import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
 
 const customGateState = defineModel()
-const props = defineProps(['flags'])
-defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate', 'page-switch'])
+const props = defineProps(['flags', 'sequenceIndex'])
+defineEmits([
+  'gate-hover',
+  'gate-unhover',
+  'state-select',
+  'calculate',
+  'page-switch',
+  'simulate-sequence'
+])
 </script>
 <template>
   <div id="parameters">
@@ -43,17 +50,30 @@ defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate', 'page-sw
     <div class="span-2">
       <hr />
       <button
-        id="custom-gate"
+        class="custom-gate"
         @click.passive="$emit('calculate')"
         :disabled="props.flags.simulating || props.flags.calculating"
       >
         Calculate
       </button>
     </div>
+    <div class="span-2" v-if="customGateState?.results?.solovayKitaev">
+      <button
+        @click="$emit('simulate-sequence')"
+        class="custom-gate"
+        :class="{ simulating: props.flags.simulating }"
+      >
+        <template v-if="!props.flags.simulating"> Simulate </template>
+        <template v-else>
+          Simulating<br />({{ props.sequenceIndex }} /
+          {{ customGateState.results.solovayKitaev.gates.length }})
+        </template>
+      </button>
+    </div>
     <div class="span-2">
       <hr />
       <button
-        id="custom-gate"
+        class="custom-gate"
         @click="$emit('page-switch', 'standard')"
         @mouseover="$emit('gate-hover', 'standard')"
       >

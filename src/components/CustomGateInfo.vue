@@ -3,7 +3,6 @@ import { generateSo3Tex } from '@/solovayKitaev'
 import KatexDisplay from './KatexDisplay.vue'
 import { ref, watchEffect } from 'vue'
 
-defineEmits(['simulate-sequence'])
 const props = defineProps(['state', 'sequenceIndex', 'flags'])
 const decimalPrecision = ref(2)
 const gateDisplay = ref(null)
@@ -60,7 +59,7 @@ watchEffect(() => {
         <div
           v-for="(gate, index) in props.state.results.solovayKitaev.gates"
           :key="index"
-          :class="{ completed: index <= props.sequenceIndex }"
+          :class="{ completed: props.flags.simulating && index <= props.sequenceIndex }"
         >
           <template v-if="gate === 't'">T</template>
           <template v-else-if="gate === 'h'">H</template>
@@ -69,13 +68,6 @@ watchEffect(() => {
           >
         </div>
       </div>
-      <button @click="$emit('simulate-sequence')" :class="{ simulating: props.flags.simulating }">
-        <template v-if="!props.flags.simulating"> Simulate </template>
-        <template v-else>
-          Simulating ({{ props.sequenceIndex }} /
-          {{ props.state.results.solovayKitaev.gates.length }})
-        </template>
-      </button>
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the

@@ -32,7 +32,7 @@ button:hover:enabled {
   opacity: 0.6;
 }
 button.reset:hover:enabled,
-#custom-gate:hover:enabled {
+.custom-gate:hover:enabled {
   opacity: 1;
   background: var(--secondary);
 }
@@ -58,7 +58,7 @@ button.reset:hover:enabled,
   background: inherit;
   color: var(--primary);
 }
-#custom-gate {
+.custom-gate {
   color: var(--primary);
   background: inherit;
   font-size: inherit;

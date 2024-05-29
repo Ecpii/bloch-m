@@ -311,22 +311,18 @@ onLoop(({ delta }) => {
       v-else
       v-model="customGateState"
       :flags
+      :sequence-index="currentSequenceIndex"
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
       @page-switch="handlePageSwitch"
       @state-select="handleCustomStateSelect"
+      @simulate-sequence="handleCustomGateSequence"
       @calculate="handleCustomGateCalculate"
     />
   </div>
   <div id="gate-info-container">
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
-    <CustomGateInfo
-      :state="customGateState"
-      :sequence-index="currentSequenceIndex"
-      :flags
-      v-else
-      @simulate-sequence="handleCustomGateSequence"
-    />
+    <CustomGateInfo :state="customGateState" :sequence-index="currentSequenceIndex" :flags v-else />
   </div>
   <div id="animation-settings">
     <AnimationSettings :disabled="currentGate !== null" v-model="config" />
