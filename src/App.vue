@@ -38,7 +38,7 @@ const customGateState = ref({
   precision: 2
 })
 
-const currentSequenceIndex = shallowRef(0)
+const currentSequenceIndex = ref(-1)
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
@@ -311,6 +311,7 @@ onLoop(({ delta }) => {
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
     <CustomGateInstructions
       :state="customGateState"
+      :sequence-index="currentSequenceIndex"
       v-else
       @simulate-sequence="handleCustomGateSequence"
     />

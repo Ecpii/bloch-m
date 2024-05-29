@@ -4,23 +4,8 @@ import KatexDisplay from './KatexDisplay.vue'
 import { ref } from 'vue'
 
 defineEmits(['simulate-sequence'])
-const { state } = defineProps(['state'])
+const { state, sequenceIndex } = defineProps(['state', 'sequenceIndex'])
 const decimalPrecision = ref(2)
-
-function formatGates(gates) {
-  let res = ''
-  for (const gate of gates) {
-    if (gate === 'tdg') {
-      res = res.concat('T<sup>†</sup>')
-    } else if (gate === 't') {
-      res = res.concat('T')
-    } else {
-      res = res.concat('H')
-    }
-    res = res.concat(', ')
-  }
-  return res.slice(0, -2)
-}
 </script>
 <template>
   <template v-if="!state.results">
@@ -57,7 +42,19 @@ function formatGates(gates) {
       <h2>Solovay–Kitaev Matrix</h2>
       <KatexDisplay :tex="generateSo3Tex(state.results.solovayKitaev.product, decimalPrecision)" />
       <h2>Approximation Gates</h2>
-      <div class="gate-display" v-html="formatGates(state.results.solovayKitaev.gates)"></div>
+      <div class="gate-display">
+        <div
+          v-for="(gate, index) in state.results.solovayKitaev.gates"
+          :key="index"
+          :class="{ completed: index <= sequenceIndex }"
+        >
+          <template v-if="gate === 't'">T</template>
+          <template v-else-if="gate === 'h'">H</template>
+          <template v-else
+            ><div>T<sup>†</sup></div></template
+          >
+        </div>
+      </div>
       <button @click="$emit('simulate-sequence')">Simulate</button>
     </template>
     <template v-else>
@@ -72,6 +69,23 @@ function formatGates(gates) {
 .gate-display {
   overflow-x: scroll;
   white-space: nowrap;
-  padding: 1rem;
+  padding: 0.5rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 2.5rem;
+  grid-template-rows: 2.5rem;
+  column-gap: 0.5rem;
+}
+.gate-display > div {
+  text-align: center;
+  color: #fff;
+  background: var(--secondary);
+  /* border: 1px solid var(--text); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.completed {
+  background: var(--primary) !important;
 }
 </style>
