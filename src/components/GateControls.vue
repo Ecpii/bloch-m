@@ -69,7 +69,7 @@ function getAngle(fraction, isPositive) {
     <div class="span-2">
       <hr />
       <button
-        id="custom-gate"
+        class="custom-gate"
         @click="$emit('page-switch', 'customGate')"
         @mouseover="$emit('gate-hover', 'custom')"
       >

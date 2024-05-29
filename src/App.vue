@@ -87,7 +87,7 @@ function handleRotationGate(key, axis, angle) {
 function handlePageSwitch(newPage) {
   page.value = newPage
   if (newPage === 'customGate') {
-    qubitPosition.value = customGateState.value[customGateState.value.selecting]
+    qubitPosition.value = customGateState.value[customGateState.value.selecting].clone()
   }
 }
 function handleCustomStateSelect(newSelection) {
@@ -156,25 +156,33 @@ function fireGate(gate) {
 function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
 }
-function handleCustomGateSequence() {
+function startCustomGateSequence() {
   flags.value.simulating = true
+  flags.value.stopSimulation = false
+  qubitPosition.value = customGateState.value.startPosition.clone()
+  currentSequenceIndex.value = 0
   const sequenceGates = customGateState.value.results.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
   )
-  currentSequenceIndex.value = 0
   executeSequence(sequenceGates, () => {
     flags.value.simulating = false
   })
+}
+function stopSequenceExecution() {
+  flags.value.simulating = false
+  flags.value.stopSimulation = true
 }
 function executeSequence(sequence, onFinished) {
   if (currentSequenceIndex.value >= sequence.length) {
     onFinished()
     return
   }
+  if (flags.value.stopSimulation) {
+    return
+  }
   fireGate(sequence[currentSequenceIndex.value]).then(() => {
     currentSequenceIndex.value++
     executeSequence(sequence, onFinished)
-    // nextTick().then(() => executeSequence(sequence))
   })
 }
 
@@ -316,8 +324,9 @@ onLoop(({ delta }) => {
       @gate-unhover="handleGateUnhover"
       @page-switch="handlePageSwitch"
       @state-select="handleCustomStateSelect"
-      @simulate-sequence="handleCustomGateSequence"
       @calculate="handleCustomGateCalculate"
+      @simulate-sequence="startCustomGateSequence"
+      @simulation-stop="stopSequenceExecution"
     />
   </div>
   <div id="gate-info-container">

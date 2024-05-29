@@ -59,7 +59,9 @@ watchEffect(() => {
         <div
           v-for="(gate, index) in props.state.results.solovayKitaev.gates"
           :key="index"
-          :class="{ completed: props.flags.simulating && index <= props.sequenceIndex }"
+          :class="{
+            completed: props.flags.simulating && index <= props.sequenceIndex
+          }"
         >
           <template v-if="gate === 't'">T</template>
           <template v-else-if="gate === 'h'">H</template>

@@ -1,29 +1,33 @@
 <script setup>
 import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
+import { ref } from 'vue'
 
 const customGateState = defineModel()
 const props = defineProps(['flags', 'sequenceIndex'])
-defineEmits([
+const simulateHovered = ref(false)
+const emit = defineEmits([
   'gate-hover',
   'gate-unhover',
   'state-select',
   'calculate',
   'page-switch',
-  'simulate-sequence'
+  'simulate-sequence',
+  'simulation-stop'
 ])
+
+function handleSimulateClick() {
+  if (props.flags.simulating) {
+    emit('simulation-stop')
+  } else {
+    emit('simulate-sequence')
+  }
+}
 </script>
 <template>
   <div id="parameters">
-    <!-- <div>Start state |α⟩</div> -->
-    <!-- <div>{{ customGateState.startPosition }}</div> -->
     <KatexDisplay :tex="createQubitStatevectorTex(customGateState.startPosition, 'α')" />
-    <!-- <div>End state |β⟩</div> -->
-    <!-- <div>{{ customGateState.endPosition }}</div> -->
     <KatexDisplay :tex="createQubitStatevectorTex(customGateState.endPosition, 'β')" />
-    <!-- <KatexDisplay
-      :tex="computeSo3TexFromPoints(customGateState.startPosition, customGateState.endPosition)"
-    /> -->
     <button
       @click="$emit('state-select', 'startPosition')"
       :class="{ active: customGateState.selecting === 'startPosition' }"
@@ -36,7 +40,7 @@ defineEmits([
     >
       Set |β⟩
     </button>
-    <label for="precision">Precision - {{ customGateState.precision }}</label>
+    <label for="precision">Recursion Depth - {{ customGateState.precision }}</label>
     <input
       id="precision"
       type="range"
@@ -57,17 +61,26 @@ defineEmits([
         Calculate
       </button>
     </div>
-    <div class="span-2" v-if="customGateState?.results?.solovayKitaev">
+    <div
+      class="span-2"
+      v-if="customGateState?.results?.solovayKitaev"
+      @mouseover="() => (simulateHovered = true)"
+      @mouseleave="() => (simulateHovered = false)"
+    >
       <button
-        @click="$emit('simulate-sequence')"
+        @click="handleSimulateClick"
         class="custom-gate"
-        :class="{ simulating: props.flags.simulating }"
+        :class="{
+          simulating: props.flags.simulating,
+          danger: props.flags.simulating && simulateHovered
+        }"
       >
         <template v-if="!props.flags.simulating"> Simulate </template>
-        <template v-else>
+        <template v-else-if="!simulateHovered">
           Simulating<br />({{ props.sequenceIndex }} /
           {{ customGateState.results.solovayKitaev.gates.length }})
         </template>
+        <template v-else> Stop Simulation </template>
       </button>
     </div>
     <div class="span-2">
@@ -105,5 +118,9 @@ button:disabled {
 button.active {
   color: var(--background);
   background: var(--primary);
+}
+.danger:hover:enabled {
+  background: var(--orange);
+  color: var(--background);
 }
 </style>
