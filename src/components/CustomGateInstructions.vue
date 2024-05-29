@@ -3,6 +3,7 @@ import { generateSo3Tex } from '@/solovayKitaev'
 import KatexDisplay from './KatexDisplay.vue'
 import { ref } from 'vue'
 
+defineEmits(['simulate-sequence'])
 const { state } = defineProps(['state'])
 const decimalPrecision = ref(2)
 
@@ -57,6 +58,7 @@ function formatGates(gates) {
       <KatexDisplay :tex="generateSo3Tex(state.results.solovayKitaev.product, decimalPrecision)" />
       <h2>Approximation Gates</h2>
       <div class="gate-display" v-html="formatGates(state.results.solovayKitaev.gates)"></div>
+      <button @click="$emit('simulate-sequence')">Simulate</button>
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the

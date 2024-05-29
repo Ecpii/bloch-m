@@ -133,18 +133,36 @@ function fireGate(gate) {
   }
   arcPoints.value = []
   currentGate.value = gate
-  setTimeout(() => {
-    setQubitStatevector(endStatevector)
-    currentGate.value = null
+  return new Promise((resolve) =>
     setTimeout(() => {
-      if (currentGate.value === null) {
-        removeAxisCopies()
-      }
-    }, 500)
-  }, config.value.animationDuration * 1000)
+      setQubitStatevector(endStatevector)
+      currentGate.value = null
+      setTimeout(() => {
+        if (currentGate.value === null) {
+          removeAxisCopies()
+        }
+        resolve()
+      }, 500)
+    }, config.value.animationDuration * 1000)
+  )
 }
 function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
+}
+function handleCustomGateSequence() {
+  const sequenceGates = customGateState.value.results.solovayKitaev.gates.map(
+    (gateName) => GATES[gateName]
+  )
+  executeSequence(sequenceGates)
+}
+function executeSequence(sequence) {
+  fireGateInSequence(sequence, 0)
+}
+function fireGateInSequence(sequence, index) {
+  if (index >= sequence.length) {
+    return
+  }
+  fireGate(sequence[index]).then(() => fireGateInSequence(sequence, index + 1))
 }
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
@@ -288,7 +306,11 @@ onLoop(({ delta }) => {
   </div>
   <div id="gate-info-container">
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
-    <CustomGateInstructions :state="customGateState" v-else />
+    <CustomGateInstructions
+      :state="customGateState"
+      v-else
+      @simulate-sequence="handleCustomGateSequence"
+    />
   </div>
   <div id="animation-settings">
     <AnimationSettings :disabled="currentGate !== null" v-model="config" />
