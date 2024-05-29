@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
-import { Line2, OrbitControls, Sphere, Stats, Sparkles } from '@tresjs/cientos'
+import { Line2, OrbitControls, Stats } from '@tresjs/cientos'
 import { Vector3, BufferGeometry, Line, LineBasicMaterial, Object3D, Euler } from 'three'
 import {
   GATES,
@@ -10,11 +10,7 @@ import {
   calculateCoordinates,
   generateRotationMatrix
 } from './qubit'
-import {
-  computeSo3FromPoints,
-  computeSo3TexFromPoints,
-  solovayKitaevFromPoints
-} from '@/solovayKitaev'
+import { computeSo3FromPoints, solovayKitaevFromPoints } from '@/solovayKitaev'
 
 import GateControls from './components/GateControls.vue'
 import CustomGateControls from './components/CustomGateControls.vue'
@@ -90,14 +86,23 @@ function handleCustomStateSelect(newSelection) {
   qubitPosition.value = customGateState.value[newSelection]
 }
 function handleCustomGateCalculate() {
+  const startPosition = {
+    x: 0.911342772806145,
+    y: 0.055964830142802666,
+    z: 0.4067669540282104
+  }
   console.time('calculateCustomGate')
   const so3Matrix = computeSo3FromPoints(
-    customGateState.value.startPosition,
+    // customGateState.value.startPosition,
+    startPosition,
     customGateState.value.endPosition
   )
+  console.log('customGateState.value.startPosition', customGateState.value.startPosition)
+  console.log('customGateState.value.endPosiiton', customGateState.value.endPosition)
   const solovayKitaev = solovayKitaevFromPoints(
     // const res = computeSo3FromPoints(
-    customGateState.value.startPosition,
+    // customGateState.value.startPosition,
+    startPosition,
     customGateState.value.endPosition,
     customGateState.value.precision
   )

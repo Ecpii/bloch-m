@@ -21,8 +21,7 @@ import {
   cross,
   identity,
   add,
-  det,
-  complex
+  det
 } from 'mathjs'
 // this contains the precomputed sequences of h, t, and tdg gates with their so3 matrices
 // generated from a function in qiskit, see generate_basic_approximations_json.py
@@ -56,13 +55,7 @@ class GateSequence {
   adjoint() {
     const res = new GateSequence()
     for (const gate of this.gates.toReversed()) {
-      if (gate === 't') {
-        res.gates.push('tdg')
-      } else if (gate === 'tdg') {
-        res.gates.push('t')
-      } else {
-        res.gates.push('h')
-      }
+      res.gates.push(inverseGateName(gate))
     }
     res.product = ctranspose(this.product)
     return res
@@ -124,6 +117,7 @@ export function computeSo3FromPoints(from, to) {
   const fromVector = [from.x, from.y, from.z]
   const toVector = [to.x, to.y, to.z]
   const so3Matrix = computeRotationBetween(fromVector, toVector)
+  console.log('so3Matrix', so3Matrix)
   return so3Matrix
 }
 
@@ -143,6 +137,10 @@ export function computeSo3TexFromPoints(from, to) {
 
 export function solovayKitaevFromPoints(from, to, n) {
   const so3Matrix = computeSo3FromPoints(from, to)
+  // for some reason input type range gives a string at value 0
+  if (n === '0') {
+    return solovayKitaevFromSo3(so3Matrix, 0)
+  }
   return solovayKitaevFromSo3(so3Matrix, n)
 }
 
@@ -179,6 +177,7 @@ export function solovayKitaevFromU2(targetMatrix, n) {
  * @returns {GateSequence} Approximation of u
  */
 function solovayKitaev(u, n) {
+  console.log(`solovayKitaev called with u, n`, u, n)
   if (n === 0) {
     return findClosestBasicApproximation(u)
   }
@@ -224,19 +223,14 @@ function findClosestBasicApproximation(target) {
  * @returns {Matrix} SO(3) representing +angle rotations around given axis
  */
 function constructSO3FromAxisAngle(axis, angle) {
-  if (axis === 'x') {
-    return matrix([
-      [1, 0, 0],
-      [0, cos(angle), sin(angle)],
-      [0, -1 * sin(angle), cos(angle)]
-    ])
-  } else if (axis === 'y') {
-    return matrix([
-      [cos(angle), 0, sin(angle)],
-      [0, 1, 0],
-      [-1 * sin(angle), 0, cos(angle)]
-    ])
-  }
+  let res = add(multiply(cos(angle), identity(3)), multiply(sin(angle), crossProductMatrix(axis)))
+  const axisOuterProduct = matrix([
+    [axis[0] * axis[0], axis[0] * axis[1], axis[0] * axis[2]],
+    [axis[1] * axis[0], axis[1] * axis[1], axis[1] * axis[2]],
+    [axis[2] * axis[0], axis[2] * axis[1], axis[2] * axis[2]]
+  ])
+  res = add(res, multiply(1 - cos(angle), axisOuterProduct))
+  return res
 }
 
 /**
@@ -289,7 +283,7 @@ function crossProductMatrix(vec) {
 
 /**
  * Computes a balanced commutator decomposition as described in the papers.
- * @param {matrix} so3Matrix SO(3) matrix to decompose.
+ * @param {Matrix} so3Matrix SO(3) matrix to decompose.
  * @returns {GateSequence[2]} v, w such that v w vdg wdg = U
  */
 function balancedCommutatorDecomposition(so3Matrix) {
@@ -297,8 +291,8 @@ function balancedCommutatorDecomposition(so3Matrix) {
   const angleTheta = acos((trace(so3Matrix) - 1) / 2)
   // rotation angles for vTilde and wTilde
   const anglePhi = 2 * asin(nthRoot((1 - cos(angleTheta / 2)) / 2, 4))
-  const vTilde = constructSO3FromAxisAngle('x', anglePhi)
-  const wTilde = constructSO3FromAxisAngle('y', anglePhi)
+  const vTilde = constructSO3FromAxisAngle([1, 0, 0], anglePhi)
+  const wTilde = constructSO3FromAxisAngle([0, 1, 0], anglePhi)
 
   // known as N in the Liang & Thompson paper (pg 17), known as U in the Dawson & Nielson paper (pg 8, equation 11)
   const commutator = multiply(

@@ -32,7 +32,7 @@ defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate', 'page-sw
     <input
       id="precision"
       type="range"
-      min="1"
+      min="0"
       max="8"
       step="1"
       v-model="customGateState.precision"
