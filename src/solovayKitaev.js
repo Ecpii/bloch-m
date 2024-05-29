@@ -134,6 +134,12 @@ export function computeSo3TexFromPoints(from, to) {
   return generateSo3Tex(computeSo3FromPoints(from, to))
 }
 
+export function asyncSolovayKitaevFromPoints(from, to, n) {
+  return new Promise((resolve) => {
+    resolve(solovayKitaevFromPoints(from, to, n))
+  })
+}
+
 export function solovayKitaevFromPoints(from, to, n) {
   const so3Matrix = computeSo3FromPoints(from, to)
   // for some reason input type range gives a string at value 0

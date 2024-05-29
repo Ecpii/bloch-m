@@ -3,6 +3,7 @@ import { createQubitStatevectorTex } from '@/qubit'
 import KatexDisplay from './KatexDisplay.vue'
 
 const customGateState = defineModel()
+const props = defineProps(['flags'])
 defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate', 'page-switch'])
 </script>
 <template>
@@ -33,7 +34,7 @@ defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate', 'page-sw
       id="precision"
       type="range"
       min="0"
-      max="8"
+      max="6"
       step="1"
       v-model="customGateState.precision"
     />
@@ -41,7 +42,13 @@ defineEmits(['gate-hover', 'gate-unhover', 'state-select', 'calculate', 'page-sw
   <div id="controls" @mouseleave="$emit('gate-unhover')">
     <div class="span-2">
       <hr />
-      <button id="custom-gate" @click="$emit('calculate')">Calculate</button>
+      <button
+        id="custom-gate"
+        @click.passive="$emit('calculate')"
+        :disabled="props.flags.simulating || props.flags.calculating"
+      >
+        Calculate
+      </button>
     </div>
     <div class="span-2">
       <hr />
@@ -70,6 +77,10 @@ button {
   background: inherit;
   font-size: 1rem;
   padding: 0.5rem;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 button.active {
   color: var(--background);

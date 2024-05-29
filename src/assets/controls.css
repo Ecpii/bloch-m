@@ -28,11 +28,11 @@ button.rotation {
   background: var(--orange);
   line-height: 1.25rem;
 }
-button:hover {
+button:hover:enabled {
   opacity: 0.6;
 }
-button.reset:hover,
-#custom-gate:hover {
+button.reset:hover:enabled,
+#custom-gate:hover:enabled {
   opacity: 1;
   background: var(--secondary);
 }

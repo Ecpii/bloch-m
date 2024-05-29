@@ -38,7 +38,7 @@ const customGateState = ref({
   precision: 2
 })
 
-const currentSequenceIndex = ref(-1)
+const currentSequenceIndex = ref(0)
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
@@ -94,7 +94,7 @@ function handleCustomStateSelect(newSelection) {
   customGateState.value.selecting = newSelection
   qubitPosition.value = customGateState.value[newSelection]
 }
-function handleCustomGateCalculate() {
+async function handleCustomGateCalculate() {
   // current implementation fails when points are perfectly parallel or opposite
   // todo: somehow fix this
   // todo: loading state on calculate button
@@ -109,6 +109,7 @@ function handleCustomGateCalculate() {
     return
   }
 
+  flags.value.calculating = true
   const so3Matrix = computeSo3FromPoints(
     customGateState.value.startPosition,
     customGateState.value.endPosition
@@ -118,11 +119,11 @@ function handleCustomGateCalculate() {
     customGateState.value.endPosition,
     customGateState.value.precision
   )
-
   customGateState.value.results = {
     originalSo3Matrix: so3Matrix,
     solovayKitaev
   }
+  flags.value.calculating = false
 }
 function createAxisCopies() {
   axesGuideRef.value.visible = true
@@ -309,6 +310,7 @@ onLoop(({ delta }) => {
     <CustomGateControls
       v-else
       v-model="customGateState"
+      :flags
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
       @page-switch="handlePageSwitch"
