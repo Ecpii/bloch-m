@@ -38,6 +38,7 @@ const customGateState = ref({
   precision: 2
 })
 
+const currentSequenceIndex = shallowRef(0)
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
@@ -153,16 +154,18 @@ function handleCustomGateSequence() {
   const sequenceGates = customGateState.value.results.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
   )
+  currentSequenceIndex.value = 0
   executeSequence(sequenceGates)
 }
 function executeSequence(sequence) {
-  fireGateInSequence(sequence, 0)
-}
-function fireGateInSequence(sequence, index) {
-  if (index >= sequence.length) {
+  if (currentSequenceIndex.value >= sequence.length) {
     return
   }
-  fireGate(sequence[index]).then(() => fireGateInSequence(sequence, index + 1))
+  fireGate(sequence[currentSequenceIndex.value]).then(() => {
+    currentSequenceIndex.value++
+    executeSequence(sequence)
+    // nextTick().then(() => executeSequence(sequence))
+  })
 }
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
