@@ -15,7 +15,7 @@ import { computeSo3FromPoints, solovayKitaevFromPoints, checkPoints } from '@/so
 import GateControls from './components/GateControls.vue'
 import CustomGateControls from './components/CustomGateControls.vue'
 import GateInfo from './components/GateInfo.vue'
-import CustomGateInstructions from './components/CustomGateInstructions.vue'
+import CustomGateInfo from './components/CustomGateInfo.vue'
 import StateDisplay from './components/StateDisplay.vue'
 import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
@@ -43,6 +43,11 @@ const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy 
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
 const arcPoints = ref([])
+const flags = ref({
+  simulating: false,
+  calculating: false,
+  stopSimulation: false
+})
 const { onLoop } = useRenderLoop()
 
 function handleTresPointerDown(intersection) {
@@ -151,19 +156,23 @@ function setQubitStatevector(newStatevector) {
   qubitPosition.value = calculateCoordinates(newStatevector)
 }
 function handleCustomGateSequence() {
+  flags.value.simulating = true
   const sequenceGates = customGateState.value.results.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
   )
   currentSequenceIndex.value = 0
-  executeSequence(sequenceGates)
+  executeSequence(sequenceGates, () => {
+    flags.value.simulating = false
+  })
 }
-function executeSequence(sequence) {
+function executeSequence(sequence, onFinished) {
   if (currentSequenceIndex.value >= sequence.length) {
+    onFinished()
     return
   }
   fireGate(sequence[currentSequenceIndex.value]).then(() => {
     currentSequenceIndex.value++
-    executeSequence(sequence)
+    executeSequence(sequence, onFinished)
     // nextTick().then(() => executeSequence(sequence))
   })
 }
@@ -309,9 +318,10 @@ onLoop(({ delta }) => {
   </div>
   <div id="gate-info-container">
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
-    <CustomGateInstructions
+    <CustomGateInfo
       :state="customGateState"
       :sequence-index="currentSequenceIndex"
+      :flags
       v-else
       @simulate-sequence="handleCustomGateSequence"
     />

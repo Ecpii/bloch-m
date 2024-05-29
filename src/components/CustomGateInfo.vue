@@ -1,14 +1,24 @@
 <script setup>
 import { generateSo3Tex } from '@/solovayKitaev'
 import KatexDisplay from './KatexDisplay.vue'
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 
 defineEmits(['simulate-sequence'])
-const { state, sequenceIndex } = defineProps(['state', 'sequenceIndex'])
+const props = defineProps(['state', 'sequenceIndex', 'flags'])
 const decimalPrecision = ref(2)
+const gateDisplay = ref(null)
+
+watchEffect(() => {
+  if (gateDisplay?.value?.children && props.sequenceIndex < gateDisplay.value.children.length) {
+    gateDisplay.value.children[props.sequenceIndex].scrollIntoView({
+      behavior: 'smooth',
+      inline: 'start'
+    })
+  }
+})
 </script>
 <template>
-  <template v-if="!state.results">
+  <template v-if="!props.state.results">
     <h1>Custom Gate</h1>
     <p>
       Any rotation on the Bloch sphere can be approximated with just the H, T, and T<sup>†</sup>
@@ -34,19 +44,23 @@ const decimalPrecision = ref(2)
   </template>
   <template v-else>
     <h1>Custom Gate Calculation</h1>
-    <template v-if="!state.results.error">
+    <template v-if="!props.state.results.error">
       <label for="precision">Decimal Precision - {{ decimalPrecision }} digits</label><br />
       <input id="precision" type="range" min="1" max="6" step="1" v-model="decimalPrecision" />
       <h2>Original SO(3) Matrix</h2>
-      <KatexDisplay :tex="generateSo3Tex(state.results.originalSo3Matrix, decimalPrecision)" />
+      <KatexDisplay
+        :tex="generateSo3Tex(props.state.results.originalSo3Matrix, decimalPrecision)"
+      />
       <h2>Solovay–Kitaev Matrix</h2>
-      <KatexDisplay :tex="generateSo3Tex(state.results.solovayKitaev.product, decimalPrecision)" />
+      <KatexDisplay
+        :tex="generateSo3Tex(props.state.results.solovayKitaev.product, decimalPrecision)"
+      />
       <h2>Approximation Gates</h2>
-      <div class="gate-display">
+      <div class="gate-display" ref="gateDisplay">
         <div
-          v-for="(gate, index) in state.results.solovayKitaev.gates"
+          v-for="(gate, index) in props.state.results.solovayKitaev.gates"
           :key="index"
-          :class="{ completed: index <= sequenceIndex }"
+          :class="{ completed: index <= props.sequenceIndex }"
         >
           <template v-if="gate === 't'">T</template>
           <template v-else-if="gate === 'h'">H</template>
@@ -55,7 +69,13 @@ const decimalPrecision = ref(2)
           >
         </div>
       </div>
-      <button @click="$emit('simulate-sequence')">Simulate</button>
+      <button @click="$emit('simulate-sequence')" :class="{ simulating: props.flags.simulating }">
+        <template v-if="!props.flags.simulating"> Simulate </template>
+        <template v-else>
+          Simulating ({{ props.sequenceIndex }} /
+          {{ props.state.results.solovayKitaev.gates.length }})
+        </template>
+      </button>
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the
@@ -87,5 +107,24 @@ const decimalPrecision = ref(2)
 }
 .completed {
   background: var(--primary) !important;
+}
+button {
+  border-radius: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--primary);
+  background: transparent;
+  padding: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s linear;
+}
+button:hover {
+  background: var(--secondary);
+}
+button.simulating {
+  background: var(--primary);
+  color: var(--background);
 }
 </style>
