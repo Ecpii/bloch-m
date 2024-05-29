@@ -79,6 +79,7 @@ function handleRotationGate(key, axis, angle) {
   fireGate(newGate)
 }
 function handlePageSwitch(newPage) {
+  // todo: set alpha to the value of qubitPosition on switch
   page.value = newPage
 }
 function handleCustomStateSelect(newSelection) {
@@ -88,6 +89,7 @@ function handleCustomStateSelect(newSelection) {
 function handleCustomGateCalculate() {
   // current implementation fails when points are perfectly parallel or opposite
   // todo: somehow fix this
+  // todo: loading state on calculate button
   const invalidPoints = checkPoints(
     customGateState.value.startPosition,
     customGateState.value.endPosition
@@ -99,7 +101,6 @@ function handleCustomGateCalculate() {
     return
   }
 
-  console.time('calculateCustomGate')
   const so3Matrix = computeSo3FromPoints(
     customGateState.value.startPosition,
     customGateState.value.endPosition
@@ -109,7 +110,6 @@ function handleCustomGateCalculate() {
     customGateState.value.endPosition,
     customGateState.value.precision
   )
-  console.timeEnd('calculateCustomGate')
 
   customGateState.value.results = {
     originalSo3Matrix: so3Matrix,
@@ -164,7 +164,7 @@ const rotationArc = computed(() => {
 })
 // for creating custom gates, highlights the qubit that is not currently being set
 const secondaryQubitLinePoints = computed(() => {
-  if (page.value === 'custom') {
+  if (page.value !== 'customGate') {
     return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
   }
   return customGateState.value.selecting === 'startPosition'

@@ -117,7 +117,6 @@ export function computeSo3FromPoints(from, to) {
   const fromVector = [from.x, from.y, from.z]
   const toVector = [to.x, to.y, to.z]
   const so3Matrix = computeRotationBetween(fromVector, toVector)
-  console.log('so3Matrix', so3Matrix)
   return so3Matrix
 }
 
@@ -177,7 +176,6 @@ export function solovayKitaevFromU2(targetMatrix, n) {
  * @returns {GateSequence} Approximation of u
  */
 function solovayKitaev(u, n) {
-  console.log(`solovayKitaev called with u, n`, u, n)
   if (n === 0) {
     return findClosestBasicApproximation(u)
   }
