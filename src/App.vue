@@ -79,8 +79,10 @@ function handleRotationGate(key, axis, angle) {
   fireGate(newGate)
 }
 function handlePageSwitch(newPage) {
-  // todo: set alpha to the value of qubitPosition on switch
   page.value = newPage
+  if (newPage === 'customGate') {
+    qubitPosition.value = customGateState.value[customGateState.value.selecting]
+  }
 }
 function handleCustomStateSelect(newSelection) {
   customGateState.value.selecting = newSelection
