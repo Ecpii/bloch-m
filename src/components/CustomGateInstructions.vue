@@ -48,14 +48,21 @@ function formatGates(gates) {
   </template>
   <template v-else>
     <h1>Custom Gate Calculation</h1>
-    <label for="precision">Decimal Precision - {{ decimalPrecision }} digits</label><br />
-    <input id="precision" type="range" min="1" max="6" step="1" v-model="decimalPrecision" />
-    <h2>Original SO(3) Matrix</h2>
-    <KatexDisplay :tex="generateSo3Tex(state.results.originalSo3Matrix, decimalPrecision)" />
-    <h2>Solovay–Kitaev Matrix</h2>
-    <KatexDisplay :tex="generateSo3Tex(state.results.solovayKitaev.product, decimalPrecision)" />
-    <h2>Approximation Gates</h2>
-    <div class="gate-display" v-html="formatGates(state.results.solovayKitaev.gates)"></div>
+    <template v-if="!state.results.error">
+      <label for="precision">Decimal Precision - {{ decimalPrecision }} digits</label><br />
+      <input id="precision" type="range" min="1" max="6" step="1" v-model="decimalPrecision" />
+      <h2>Original SO(3) Matrix</h2>
+      <KatexDisplay :tex="generateSo3Tex(state.results.originalSo3Matrix, decimalPrecision)" />
+      <h2>Solovay–Kitaev Matrix</h2>
+      <KatexDisplay :tex="generateSo3Tex(state.results.solovayKitaev.product, decimalPrecision)" />
+      <h2>Approximation Gates</h2>
+      <div class="gate-display" v-html="formatGates(state.results.solovayKitaev.gates)"></div>
+    </template>
+    <template v-else>
+      Error: invalid points selected. Currently, this implementation of the algorithm fails when the
+      points selected are <b>perfectly</b> parallel or opposite. To get around this, move either
+      point slightly and recalculate.
+    </template>
   </template>
 </template>
 

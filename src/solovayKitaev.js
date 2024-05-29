@@ -265,7 +265,8 @@ function computeRotationBetween(from, to) {
   const dotProduct = dot(fromVec, toVec)
   const crossProduct = crossProductMatrix(cross(fromVec, toVec))
   const crossDot = multiply(crossProduct, crossProduct)
-  return add(add(identity(3), crossProduct), divide(crossDot, 1 + dotProduct))
+  const resultMatrix = add(add(identity(3), crossProduct), divide(crossDot, 1 + dotProduct))
+  return resultMatrix
 }
 
 /**
@@ -312,4 +313,13 @@ function balancedCommutatorDecomposition(so3Matrix) {
   const w = multiply(multiply(simMatrix, wTilde), simMatrixdg)
 
   return [GateSequence.fromso3Matrix(v), GateSequence.fromso3Matrix(w)]
+}
+
+export function checkPoints(from, to) {
+  const fromVector = [from.x, from.y, from.z]
+  const toVector = [to.x, to.y, to.z]
+  const normalizedFromVec = divide(fromVector, norm(fromVector, 'fro'))
+  const normalizedToVec = divide(toVector, norm(toVector, 'fro'))
+  const dotProduct = dot(normalizedFromVec, normalizedToVec)
+  return dotProduct === -1 || dotProduct === 1
 }

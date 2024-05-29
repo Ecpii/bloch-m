@@ -10,7 +10,7 @@ import {
   calculateCoordinates,
   generateRotationMatrix
 } from './qubit'
-import { computeSo3FromPoints, solovayKitaevFromPoints } from '@/solovayKitaev'
+import { computeSo3FromPoints, solovayKitaevFromPoints, checkPoints } from '@/solovayKitaev'
 
 import GateControls from './components/GateControls.vue'
 import CustomGateControls from './components/CustomGateControls.vue'
@@ -33,7 +33,7 @@ const config = ref({
 const page = shallowRef('standard')
 const customGateState = ref({
   startPosition: new Vector3(0, 0, 1),
-  endPosition: new Vector3(0, 0, -1),
+  endPosition: new Vector3(1, 0, 0),
   selecting: 'startPosition',
   precision: 2
 })
@@ -86,32 +86,35 @@ function handleCustomStateSelect(newSelection) {
   qubitPosition.value = customGateState.value[newSelection]
 }
 function handleCustomGateCalculate() {
-  const startPosition = {
-    x: 0.911342772806145,
-    y: 0.055964830142802666,
-    z: 0.4067669540282104
-  }
-  console.time('calculateCustomGate')
-  const so3Matrix = computeSo3FromPoints(
-    // customGateState.value.startPosition,
-    startPosition,
+  // current implementation fails when points are perfectly parallel or opposite
+  // todo: somehow fix this
+  const invalidPoints = checkPoints(
+    customGateState.value.startPosition,
     customGateState.value.endPosition
   )
-  console.log('customGateState.value.startPosition', customGateState.value.startPosition)
-  console.log('customGateState.value.endPosiiton', customGateState.value.endPosition)
+  if (invalidPoints) {
+    customGateState.value.results = {
+      error: 'invalidPoints'
+    }
+    return
+  }
+
+  console.time('calculateCustomGate')
+  const so3Matrix = computeSo3FromPoints(
+    customGateState.value.startPosition,
+    customGateState.value.endPosition
+  )
   const solovayKitaev = solovayKitaevFromPoints(
-    // const res = computeSo3FromPoints(
-    // customGateState.value.startPosition,
-    startPosition,
+    customGateState.value.startPosition,
     customGateState.value.endPosition,
     customGateState.value.precision
   )
   console.timeEnd('calculateCustomGate')
+
   customGateState.value.results = {
     originalSo3Matrix: so3Matrix,
     solovayKitaev
   }
-  console.log('res', solovayKitaev)
 }
 function createAxisCopies() {
   axesGuideRef.value.visible = true
