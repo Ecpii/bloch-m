@@ -75,7 +75,7 @@ watchEffect(() => {
           >
         </div>
       </div>
-      <CopyButton display-text="hi" copy-text="bye" />
+      <CopyButton copy-text="bye">Copy QASM</CopyButton>
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the
