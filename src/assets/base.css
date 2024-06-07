@@ -27,6 +27,7 @@
   box-sizing: border-box;
   margin: 0;
   font-weight: normal;
+  scrollbar-color: var(--secondary) transparent;
 }
 
 body {
