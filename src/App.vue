@@ -353,7 +353,7 @@ onLoop(({ delta }) => {
   transform: translateY(-50%);
 }
 #gate-info-container {
-  width: calc((100vw - 650px) / 2);
+  width: calc((100vw - 700px) / 2);
   position: absolute;
   left: 1rem;
   top: 50%;
