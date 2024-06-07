@@ -1,7 +1,7 @@
 <script setup>
 import CopyIcon from './icons/copy.svg'
 import { ref } from 'vue'
-const props = defineProps(['copyText'])
+const props = defineProps(['copyText', 'copyFunction'])
 const recentlyCopied = ref(false)
 const copyError = ref(null)
 const timeoutId = ref(0)
@@ -11,7 +11,8 @@ async function handleClick() {
   clearTimeout(timeoutId.value)
   copyError.value = null
   try {
-    await navigator.clipboard.writeText(props.copyText)
+    const payload = props.copyText ?? props.copyFunction()
+    await navigator.clipboard.writeText(payload)
     recentlyCopied.value = true
     timeoutId.value = setTimeout(() => {
       recentlyCopied.value = false

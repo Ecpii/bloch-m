@@ -8,6 +8,17 @@ const props = defineProps(['state', 'sequenceIndex', 'flags'])
 const decimalPrecision = ref(2)
 const gateDisplay = ref(null)
 
+function generateQasm() {
+  const gateCommands = props.state.results.solovayKitaev.gates.map((gate) => `${gate} q;`)
+  let result = `OPENQASM 3.1;
+
+include "stdgates.inc";
+
+qubit q;
+${gateCommands.join('\n')}`
+  return result
+}
+
 watchEffect(() => {
   if (
     gateDisplay?.value?.children &&
@@ -59,7 +70,10 @@ watchEffect(() => {
       <KatexDisplay
         :tex="generateSo3Tex(props.state.results.solovayKitaev.product, decimalPrecision)"
       />
-      <h2>Approximation Gates</h2>
+      <div class="flex">
+        <h2>Approximation Gates</h2>
+        <CopyButton :copy-function="generateQasm">Copy QASM</CopyButton>
+      </div>
       <div class="gate-display" ref="gateDisplay">
         <div
           v-for="(gate, index) in props.state.results.solovayKitaev.gates"
@@ -75,7 +89,6 @@ watchEffect(() => {
           >
         </div>
       </div>
-      <CopyButton copy-text="bye">Copy QASM</CopyButton>
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the
@@ -86,6 +99,11 @@ watchEffect(() => {
 </template>
 
 <style scoped>
+.flex {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
 .gate-display {
   overflow-x: scroll;
   white-space: nowrap;
