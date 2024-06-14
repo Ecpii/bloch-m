@@ -4,12 +4,13 @@ import { ref, watchEffect } from 'vue'
 import CopyButton from './CopyButton.vue'
 import KatexDisplay from './KatexDisplay.vue'
 
-const props = defineProps(['state', 'sequenceIndex', 'flags'])
+const props = defineProps(['result', 'sequenceIndex', 'flags'])
 const decimalPrecision = ref(2)
 const gateDisplay = ref(null)
 
 function generateQasm() {
-  const gateCommands = props.state.results.solovayKitaev.gates.map((gate) => `${gate} q;`)
+  // todo: add global phase here
+  const gateCommands = props.result.solovayKitaev.gates.map((gate) => `${gate} q;`)
   let result = `OPENQASM 3.1;
 
 include "stdgates.inc";
@@ -33,7 +34,7 @@ watchEffect(() => {
 })
 </script>
 <template>
-  <template v-if="!props.state.results">
+  <template v-if="!props.result">
     <h1>Custom Gate</h1>
     <p>
       Any rotation on the Bloch sphere can be approximated with just the H, T, and T<sup>†</sup>
@@ -59,24 +60,24 @@ watchEffect(() => {
   </template>
   <template v-else>
     <h1>Custom Gate Calculation</h1>
-    <template v-if="!props.state.results.error">
-      <label for="precision">Decimal Precision - {{ decimalPrecision }} digits</label><br />
+    <template v-if="!props.result.error">
+      <label for="precision"
+        >Decimal Precision - {{ decimalPrecision }} digit<template v-if="decimalPrecision != 1"
+          >s</template
+        ></label
+      ><br />
       <input id="precision" type="range" min="1" max="6" step="1" v-model="decimalPrecision" />
       <h2>Original SO(3) Matrix</h2>
-      <KatexDisplay
-        :tex="generateSo3Tex(props.state.results.originalSo3Matrix, decimalPrecision)"
-      />
+      <KatexDisplay :tex="generateSo3Tex(props.result.originalSo3Matrix, decimalPrecision)" />
       <h2>Solovay–Kitaev Matrix</h2>
-      <KatexDisplay
-        :tex="generateSo3Tex(props.state.results.solovayKitaev.product, decimalPrecision)"
-      />
+      <KatexDisplay :tex="generateSo3Tex(props.result.solovayKitaev.product, decimalPrecision)" />
       <div class="flex">
         <h2>Approximation Gates</h2>
         <CopyButton :copy-function="generateQasm">Copy QASM</CopyButton>
       </div>
       <div class="gate-display" ref="gateDisplay">
         <div
-          v-for="(gate, index) in props.state.results.solovayKitaev.gates"
+          v-for="(gate, index) in props.result.solovayKitaev.gates"
           :key="index"
           :class="{
             completed: props.flags.simulating && index <= props.sequenceIndex
@@ -89,7 +90,8 @@ watchEffect(() => {
           >
         </div>
       </div>
-      Global Phase: {{ props.state.results.solovayKitaev.globalPhase }}
+      Global phase:
+      {{ props.result.solovayKitaev.globalPhase.toFixed(decimalPrecision) }} radians
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the

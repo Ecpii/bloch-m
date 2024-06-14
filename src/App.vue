@@ -37,6 +37,7 @@ const customGateState = ref({
   selecting: 'startPosition',
   precision: 2
 })
+const customGateResult = ref()
 
 const currentSequenceIndex = ref(0)
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
@@ -103,7 +104,7 @@ async function handleCustomGateCalculate() {
     customGateState.value.endPosition
   )
   if (invalidPoints) {
-    customGateState.value.results = {
+    customGateResult.value = {
       error: 'invalidPoints'
     }
     return
@@ -119,7 +120,7 @@ async function handleCustomGateCalculate() {
     customGateState.value.endPosition,
     customGateState.value.precision
   )
-  customGateState.value.results = {
+  customGateResult.value = {
     originalSo3Matrix: so3Matrix,
     solovayKitaev
   }
@@ -331,7 +332,12 @@ onLoop(({ delta }) => {
   </div>
   <div id="gate-info-container">
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
-    <CustomGateInfo :state="customGateState" :sequence-index="currentSequenceIndex" :flags v-else />
+    <CustomGateInfo
+      :result="customGateResult"
+      :sequence-index="currentSequenceIndex"
+      :flags
+      v-else
+    />
   </div>
   <div id="animation-settings">
     <AnimationSettings :disabled="currentGate !== null" v-model="config" />
