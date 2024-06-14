@@ -63,7 +63,7 @@ function getAngle(fraction, isPositive) {
       @click="$emit('rotation-gate', gate.key, gate.axis, getAngle(theta, gate.isPositive))"
       @mouseover="$emit('gate-hover', gate.key)"
     >
-      R{{ gate.axis }}<br />
+      <div>R{{ gate.axis }}</div>
       <span style="font-size: 1rem">{{ gate.angle }}</span>
     </button>
     <div class="span-2">
@@ -81,4 +81,24 @@ function getAngle(fraction, isPositive) {
 
 <style scoped>
 @import '../assets/controls.css';
+button.pauli {
+  background: var(--primary);
+}
+button.h {
+  background: var(--accent);
+}
+button.s {
+  background: var(--purple);
+}
+button.t {
+  background: var(--green);
+}
+button.rotation {
+  background: var(--orange);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 </style>

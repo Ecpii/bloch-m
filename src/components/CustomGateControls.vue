@@ -101,7 +101,7 @@ function handleSimulateClick() {
 #parameters {
   display: flex;
   flex-direction: column;
-  width: calc(4rem * 2 + 1rem); /* same width as #controls */
+  width: calc(4rem * 2 + 1rem); /* same width as controls */
   gap: 0.5rem;
   margin-bottom: 1rem;
 }

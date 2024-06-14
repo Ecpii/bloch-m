@@ -12,22 +12,6 @@ button.reset {
   background: transparent;
   color: var(--primary);
 }
-button.pauli {
-  background: var(--primary);
-}
-button.h {
-  background: var(--accent);
-}
-button.s {
-  background: var(--purple);
-}
-button.t {
-  background: var(--green);
-}
-button.rotation {
-  background: var(--orange);
-  line-height: 1.25rem;
-}
 button:hover:enabled {
   opacity: 0.6;
 }
