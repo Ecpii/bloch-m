@@ -35,13 +35,14 @@ class GateSequence {
   gates = []
   // so3 matrix representing the product of all the gates
   product = identity(3)
+  globalPhase = 0
 
-  static fromsu2Matrix(matrix) {
+  static fromSu2Matrix(matrix) {
     const res = new GateSequence()
     res.product = convertSu2ToSo3(matrix)
     return res
   }
-  static fromso3Matrix(matrix) {
+  static fromSo3Matrix(matrix) {
     const res = new GateSequence()
     res.product = matrix
     return res
@@ -58,6 +59,7 @@ class GateSequence {
       res.gates.push(inverseGateName(gate))
     }
     res.product = ctranspose(this.product)
+    res.globalPhase = -1 * this.globalPhase
     return res
   }
   /**
@@ -70,6 +72,7 @@ class GateSequence {
     const res = new GateSequence()
     res.gates = other.gates.concat(this.gates)
     res.product = multiply(this.product, other.product)
+    res.globalPhase = this.globalPhase + other.globalPhase
     return res
   }
 
@@ -85,8 +88,12 @@ class GateSequence {
         this.gates.splice(index, 2)
         // check if this removal caused another inverse neighbor
         index--
+        if (index < 0) {
+          index = 0
+        }
+      } else {
+        index++
       }
-      index++
     }
   }
 }
@@ -150,7 +157,7 @@ export function solovayKitaevFromPoints(from, to, n) {
 }
 
 export function solovayKitaevFromSo3(so3Matrix, n) {
-  const inputSequence = GateSequence.fromso3Matrix(so3Matrix)
+  const inputSequence = GateSequence.fromSo3Matrix(so3Matrix)
   const resSequence = solovayKitaev(inputSequence, n)
   resSequence.clean()
   return resSequence
@@ -167,7 +174,7 @@ export function solovayKitaevFromSo3(so3Matrix, n) {
  */
 export function solovayKitaevFromU2(targetMatrix, n) {
   const phaseFactor = divide(1, sqrt(det(targetMatrix)))
-  const inputSequence = GateSequence.fromsu2Matrix(multiply(phaseFactor, targetMatrix))
+  const inputSequence = GateSequence.fromSu2Matrix(multiply(phaseFactor, targetMatrix))
   // const globalPhase = atan2(phaseFactor.im, phaseFactor.re)
 
   const resSequence = solovayKitaev(inputSequence, n)
@@ -214,8 +221,9 @@ function findClosestBasicApproximation(target) {
       minLossApprox = approx
     }
   }
-  const minLossSequence = GateSequence.fromso3Matrix(matrix(minLossApprox.matrix))
+  const minLossSequence = GateSequence.fromSo3Matrix(matrix(minLossApprox.matrix))
   minLossSequence.gates = minLossApprox.names
+  minLossSequence.globalPhase = minLossApprox.phase
   return minLossSequence
 }
 
@@ -316,7 +324,7 @@ function balancedCommutatorDecomposition(so3Matrix) {
   const v = multiply(multiply(simMatrix, vTilde), simMatrixdg)
   const w = multiply(multiply(simMatrix, wTilde), simMatrixdg)
 
-  return [GateSequence.fromso3Matrix(v), GateSequence.fromso3Matrix(w)]
+  return [GateSequence.fromSo3Matrix(v), GateSequence.fromSo3Matrix(w)]
 }
 
 export function checkPoints(from, to) {

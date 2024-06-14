@@ -89,6 +89,7 @@ watchEffect(() => {
           >
         </div>
       </div>
+      Global Phase: {{ props.state.results.solovayKitaev.globalPhase }}
     </template>
     <template v-else>
       Error: invalid points selected. Currently, this implementation of the algorithm fails when the
