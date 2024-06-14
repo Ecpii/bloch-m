@@ -1,6 +1,4 @@
 <script setup>
-import { computed } from 'vue'
-
 const { tex } = defineProps(['tex'])
 function renderDisplayKatex(tex) {
   return katex.renderToString(tex, { displayMode: true, output: 'html' })

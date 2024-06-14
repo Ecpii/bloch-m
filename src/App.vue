@@ -162,7 +162,7 @@ function startCustomGateSequence() {
   flags.value.stopSimulation = false
   qubitPosition.value = customGateState.value.startPosition.clone()
   currentSequenceIndex.value = 0
-  const sequenceGates = customGateState.value.results.solovayKitaev.gates.map(
+  const sequenceGates = customGateResult.value.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
   )
   executeSequence(sequenceGates, () => {
@@ -321,6 +321,7 @@ onLoop(({ delta }) => {
       v-model="customGateState"
       :flags
       :sequence-index="currentSequenceIndex"
+      :result="customGateResult"
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
       @page-switch="handlePageSwitch"

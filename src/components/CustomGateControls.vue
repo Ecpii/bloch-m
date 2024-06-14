@@ -4,7 +4,7 @@ import KatexDisplay from './KatexDisplay.vue'
 import { ref } from 'vue'
 
 const customGateState = defineModel()
-const props = defineProps(['flags', 'sequenceIndex'])
+const props = defineProps(['flags', 'sequenceIndex', 'result'])
 const simulateHovered = ref(false)
 const emit = defineEmits([
   'gate-hover',
@@ -63,7 +63,7 @@ function handleSimulateClick() {
     </div>
     <div
       class="span-2"
-      v-if="customGateState?.results?.solovayKitaev"
+      v-if="props.result?.solovayKitaev"
       @mouseover="() => (simulateHovered = true)"
       @mouseleave="() => (simulateHovered = false)"
     >
@@ -78,7 +78,7 @@ function handleSimulateClick() {
         <template v-if="!props.flags.simulating"> Simulate </template>
         <template v-else-if="!simulateHovered">
           Simulating<br />({{ props.sequenceIndex }} /
-          {{ customGateState.results.solovayKitaev.gates.length }})
+          {{ props.result.solovayKitaev.gates.length }})
         </template>
         <template v-else> Stop Simulation </template>
       </button>
