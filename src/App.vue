@@ -21,6 +21,17 @@ import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
 import AnimationSettings from './components/AnimationSettings.vue'
 Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system since threejs is default y-up
+const COLORS = {
+  text: '#020a27',
+  background: '#edf2fe',
+  primary: '#062184',
+  secondary: '#7995f9',
+  accent: '#cfb805',
+  purple: '#a488af',
+  green: '#a1be7e',
+  orange: '#f1a04a',
+  red: '#e5645e'
+}
 
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
@@ -200,18 +211,28 @@ const rotationArc = computed(() => {
   if (!config.value.showRotationArc || !arcPoints.value.length) {
     return new Line()
   }
-  const material = new LineBasicMaterial({ color: 0xcfb805, linewidth: 3 })
+  const material = new LineBasicMaterial({ color: COLORS.accent, linewidth: 3 })
   const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
   return new Line(geometry, material)
 })
 // for creating custom gates, highlights the qubit that is not currently being set
-const secondaryQubitLinePoints = computed(() => {
-  if (page.value !== 'customGate') {
+const customGateStartLinePoints = computed(() => {
+  if (
+    page.value !== 'customGate' ||
+    customGateState.value.startPosition.equals(qubitPosition.value) // prevent z-fighting
+  ) {
     return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
   }
-  return customGateState.value.selecting === 'startPosition'
-    ? [new Vector3(0, 0, 0), customGateState.value.endPosition]
-    : [new Vector3(0, 0, 0), customGateState.value.startPosition]
+  return [new Vector3(0, 0, 0), customGateState.value.startPosition]
+})
+const customGateEndLinePoints = computed(() => {
+  if (
+    page.value !== 'customGate' ||
+    customGateState.value.endPosition.equals(qubitPosition.value) // prevent z-fighting
+  ) {
+    return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
+  }
+  return [new Vector3(0, 0, 0), customGateState.value.endPosition]
 })
 
 onLoop(({ delta }) => {
@@ -260,7 +281,7 @@ onLoop(({ delta }) => {
             [0, 0, -1],
             [0, 0, 1]
           ]"
-          color="#7b97f9"
+          :color="COLORS.secondary"
           :line-width="3"
         />
         <Line2
@@ -268,7 +289,7 @@ onLoop(({ delta }) => {
             [0, -1, 0],
             [0, 1, 0]
           ]"
-          color="#7b97f9"
+          :color="COLORS.secondary"
           :line-width="3"
         />
         <Line2
@@ -276,7 +297,7 @@ onLoop(({ delta }) => {
             [-1, 0, 0],
             [1, 0, 0]
           ]"
-          color="#7b97f9"
+          :color="COLORS.secondary"
           :line-width="3"
         />
       </TresGroup>
@@ -291,16 +312,17 @@ onLoop(({ delta }) => {
 
       <TresMesh :position="[0, 0, 0]" @pointer-down="handleTresPointerDown" ref="sphereRef">
         <TresSphereGeometry :args="[1, 64, 64]" />
-        <TresMeshBasicMaterial color="#7995f9" :transparent="true" :opacity="0.25" />
+        <TresMeshBasicMaterial color="#7995f9" :transparent="true" :opacity="0.2" />
       </TresMesh>
 
       <TresMesh :position="qubitPosition" ref="pointRef">
         <TresSphereGeometry :args="[0.015]" />
-        <TresMeshBasicMaterial color="#cfb805" />
+        <TresMeshBasicMaterial :color="COLORS.accent" />
       </TresMesh>
-      <Line2 :points="secondaryQubitLinePoints" color="#7b97f9" :line-width="5" />
-      <Line2 :points="qubitLinePoints" color="#062184" :line-width="5" />
-      <Line2 :points="rotationAxis" color="#cfb805" :line-width="3" />
+      <Line2 :points="customGateStartLinePoints" :color="COLORS.secondary" :line-width="5" />
+      <Line2 :points="customGateEndLinePoints" :color="COLORS.purple" :line-width="5" />
+      <Line2 :points="qubitLinePoints" :color="COLORS.primary" :line-width="5" />
+      <Line2 :points="rotationAxis" :color="COLORS.accent" :line-width="3" />
     </TresCanvas>
   </div>
   <div id="state-display-container">
