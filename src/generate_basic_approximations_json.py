@@ -34,7 +34,7 @@ def clean_matrix(matrix):
     return matrix
 
 
-res = generate_basic_approximations(["h", "t", "tdg"], 10)
+res = generate_basic_approximations(["h", "t", "tdg"], 5)
 print("[", end="")
 for gateseq in res[:-1]:
     print(

@@ -225,17 +225,20 @@ const customGateEndLinePoints = computed(() => {
   return [new Vector3(0, 0, 0), customGateState.value.endPosition]
 })
 const qubitLineColor = computed(() => {
-  if (page.value !== 'customGate') {
-    return COLORS.primary
-  }
-  if (flags.value.simulating) {
+  if (page.value !== 'customGate' || flags.value.simulating) {
     return COLORS.primary
   }
 
-  if (customGateState.value.selecting === 'startPosition') {
+  if (
+    customGateState.value.selecting === 'startPosition' &&
+    customGateState.value.startPosition.equals(qubitPosition.value)
+  ) {
     return COLORS.secondary
   }
-  if (customGateState.value.selecting === 'endPosition') {
+  if (
+    customGateState.value.selecting === 'endPosition' &&
+    customGateState.value.endPosition.equals(qubitPosition.value)
+  ) {
     return COLORS.purple
   }
   return COLORS.primary
