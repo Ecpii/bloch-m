@@ -11,6 +11,7 @@ import {
   generateRotationMatrix
 } from './qubit'
 import { computeSo3FromPoints, solovayKitaevFromPoints, checkPoints } from '@/solovayKitaev'
+import COLORS from './colors'
 
 import GateControls from './components/GateControls.vue'
 import CustomGateControls from './components/CustomGateControls.vue'
@@ -21,17 +22,6 @@ import AxesLines from './components/AxesLines.vue'
 import AxesLabels from './components/AxesLabels.vue'
 import AnimationSettings from './components/AnimationSettings.vue'
 Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system since threejs is default y-up
-const COLORS = {
-  text: '#020a27',
-  background: '#edf2fe',
-  primary: '#062184',
-  secondary: '#7995f9',
-  accent: '#cfb805',
-  purple: '#a488af',
-  green: '#a1be7e',
-  orange: '#f1a04a',
-  red: '#e5645e'
-}
 
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
@@ -234,6 +224,22 @@ const customGateEndLinePoints = computed(() => {
   }
   return [new Vector3(0, 0, 0), customGateState.value.endPosition]
 })
+const qubitLineColor = computed(() => {
+  if (page.value !== 'customGate') {
+    return COLORS.primary
+  }
+  if (flags.value.simulating) {
+    return COLORS.primary
+  }
+
+  if (customGateState.value.selecting === 'startPosition') {
+    return COLORS.secondary
+  }
+  if (customGateState.value.selecting === 'endPosition') {
+    return COLORS.purple
+  }
+  return COLORS.primary
+})
 
 onLoop(({ delta }) => {
   if (currentGate.value !== null) {
@@ -321,7 +327,7 @@ onLoop(({ delta }) => {
       </TresMesh>
       <Line2 :points="customGateStartLinePoints" :color="COLORS.secondary" :line-width="5" />
       <Line2 :points="customGateEndLinePoints" :color="COLORS.purple" :line-width="5" />
-      <Line2 :points="qubitLinePoints" :color="COLORS.primary" :line-width="5" />
+      <Line2 :points="qubitLinePoints" :color="qubitLineColor" :line-width="5" />
       <Line2 :points="rotationAxis" :color="COLORS.accent" :line-width="3" />
     </TresCanvas>
   </div>

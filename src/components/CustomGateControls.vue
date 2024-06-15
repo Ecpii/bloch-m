@@ -30,13 +30,13 @@ function handleSimulateClick() {
     <KatexDisplay :tex="createQubitStatevectorTex(customGateState.endPosition, 'β')" />
     <button
       @click="$emit('state-select', 'startPosition')"
-      :class="{ active: customGateState.selecting === 'startPosition' }"
+      :class="{ start: true, startActive: customGateState.selecting === 'startPosition' }"
     >
       Set |α⟩
     </button>
     <button
       @click="$emit('state-select', 'endPosition')"
-      :class="{ active: customGateState.selecting === 'endPosition' }"
+      :class="{ end: true, endActive: customGateState.selecting === 'endPosition' }"
     >
       Set |β⟩
     </button>
@@ -118,6 +118,20 @@ button:disabled {
 button.active {
   color: var(--background);
   background: var(--primary);
+}
+/* button.start {
+  color: var(--secondary);
+} */
+button.startActive {
+  color: var(--background);
+  background: var(--secondary);
+}
+/* button.end {
+  color: var(--purple);
+} */
+button.endActive {
+  color: var(--background);
+  background: var(--purple);
 }
 .danger:hover:enabled {
   background: var(--orange);
