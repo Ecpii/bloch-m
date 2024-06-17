@@ -3,6 +3,8 @@ import { computed, ref, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
 import { Line2, OrbitControls, Stats } from '@tresjs/cientos'
 import { Vector3, BufferGeometry, Line, LineBasicMaterial, Object3D, Euler } from 'three'
+import { multiply } from 'mathjs'
+
 import {
   GATES,
   calculateStatevector,
@@ -48,7 +50,7 @@ const arcPoints = ref([])
 const flags = ref({
   simulating: false,
   calculating: false,
-  stopSimulation: false
+  skipSimulation: false
 })
 const { onLoop } = useRenderLoop()
 
@@ -100,10 +102,9 @@ async function handleCustomGateCalculate() {
   // current implementation fails when points are perfectly parallel or opposite
   // todo: somehow fix this
   // todo: loading state on calculate button
-  const invalidPoints = checkPoints(
-    customGateState.value.startPosition,
-    customGateState.value.endPosition
-  )
+  const startPosition = customGateState.value.startPosition
+  const endPosition = customGateState.value.endPosition
+  const invalidPoints = checkPoints(startPosition, endPosition)
   if (invalidPoints) {
     customGateResult.value = {
       error: 'invalidPoints'
@@ -112,18 +113,17 @@ async function handleCustomGateCalculate() {
   }
 
   flags.value.calculating = true
-  const so3Matrix = computeSo3FromPoints(
-    customGateState.value.startPosition,
-    customGateState.value.endPosition
-  )
+  const so3Matrix = computeSo3FromPoints(startPosition, endPosition)
   const solovayKitaev = solovayKitaevFromPoints(
-    customGateState.value.startPosition,
-    customGateState.value.endPosition,
+    startPosition,
+    endPosition,
     customGateState.value.precision
   )
+  const expectedEndVector = solovayKitaev.apply(startPosition)
   customGateResult.value = {
     originalSo3Matrix: so3Matrix,
-    solovayKitaev
+    solovayKitaev,
+    expectedEndVector
   }
   flags.value.calculating = false
 }
@@ -144,8 +144,14 @@ function fireGate(gate) {
   currentGate.value = gate
   return new Promise((resolve) =>
     setTimeout(() => {
-      setQubitStatevector(endStatevector)
+      if (flags.value.skipSimulation) {
+        resolve()
+        return
+      }
+
       currentGate.value = null
+      setQubitStatevector(endStatevector)
+
       setTimeout(() => {
         if (currentGate.value === null) {
           removeAxisCopies()
@@ -160,28 +166,32 @@ function setQubitStatevector(newStatevector) {
 }
 function startCustomGateSequence() {
   flags.value.simulating = true
-  flags.value.stopSimulation = false
-  qubitPosition.value = customGateState.value.startPosition.clone()
+  flags.value.skipSimulation = false
+  const startPosition = customGateState.value.startPosition
+  qubitPosition.value = startPosition.clone()
   currentSequenceIndex.value = 0
+
   const sequenceGates = customGateResult.value.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
   )
+
   executeSequence(sequenceGates, () => {
     flags.value.simulating = false
+    qubitPosition.value = customGateResult.value.expectedEndVector
   })
 }
-function stopSequenceExecution() {
+function fastForwardSequenceExecution() {
+  currentGate.value = null
   flags.value.simulating = false
-  flags.value.stopSimulation = true
+  flags.value.skipSimulation = true
+  qubitPosition.value = customGateResult.value.expectedEndVector
 }
 function executeSequence(sequence, onFinished) {
-  if (currentSequenceIndex.value >= sequence.length) {
+  if (currentSequenceIndex.value >= sequence.length || flags.value.skipSimulation) {
     onFinished()
     return
   }
-  if (flags.value.stopSimulation) {
-    return
-  }
+
   fireGate(sequence[currentSequenceIndex.value]).then(() => {
     currentSequenceIndex.value++
     executeSequence(sequence, onFinished)
@@ -359,7 +369,7 @@ onLoop(({ delta }) => {
       @state-select="handleCustomStateSelect"
       @calculate="handleCustomGateCalculate"
       @simulate-sequence="startCustomGateSequence"
-      @simulation-stop="stopSequenceExecution"
+      @skip-simulation="fastForwardSequenceExecution"
     />
   </div>
   <div id="gate-info-container">

@@ -23,6 +23,7 @@ import {
   add,
   det
 } from 'mathjs'
+import { applyGate, calculateStatevector, calculateCoordinates, GATES } from './qubit'
 // this contains the precomputed sequences of h, t, and tdg gates with their so3 matrices
 // generated from a function in qiskit, see generate_basic_approximations_json.py
 import basicApproximations from './basicApproximations.json'
@@ -95,6 +96,15 @@ class GateSequence {
         index++
       }
     }
+  }
+
+  apply(vector) {
+    let statevector = calculateStatevector(vector)
+    const sequenceGates = this.gates.map((gateName) => GATES[gateName])
+    for (const gate of sequenceGates) {
+      statevector = applyGate(statevector, gate)
+    }
+    return calculateCoordinates(statevector)
   }
 }
 

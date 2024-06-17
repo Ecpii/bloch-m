@@ -13,12 +13,12 @@ const emit = defineEmits([
   'calculate',
   'page-switch',
   'simulate-sequence',
-  'simulation-stop'
+  'skip-simulation'
 ])
 
 function handleSimulateClick() {
   if (props.flags.simulating) {
-    emit('simulation-stop')
+    emit('skip-simulation')
   } else {
     emit('simulate-sequence')
   }
@@ -80,7 +80,7 @@ function handleSimulateClick() {
           Simulating<br />({{ props.sequenceIndex }} /
           {{ props.result.solovayKitaev.gates.length }})
         </template>
-        <template v-else> Stop Simulation </template>
+        <template v-else> Fast-Forward Simulation </template>
       </button>
     </div>
     <div class="span-2">
