@@ -3,7 +3,6 @@ import { computed, ref, shallowRef, triggerRef } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
 import { Line2, OrbitControls, Stats } from '@tresjs/cientos'
 import { Vector3, BufferGeometry, Line, LineBasicMaterial, Object3D, Euler } from 'three'
-import { multiply } from 'mathjs'
 
 import {
   GATES,
@@ -12,7 +11,12 @@ import {
   calculateCoordinates,
   generateRotationMatrix
 } from './qubit'
-import { computeSo3FromPoints, solovayKitaevFromPoints, checkPoints } from '@/solovayKitaev'
+import {
+  computeSo3FromPoints,
+  solovayKitaevFromPoints,
+  checkPoints,
+  createGateFromPoints
+} from '@/solovayKitaev'
 import COLORS from './colors'
 
 import GateControls from './components/GateControls.vue'
@@ -94,11 +98,11 @@ function handlePageSwitch(newPage) {
     qubitPosition.value = customGateState.value[customGateState.value.selecting].clone()
   }
 }
-function handleCustomStateSelect(newSelection) {
+function setCustomStateSelection(newSelection) {
   customGateState.value.selecting = newSelection
   qubitPosition.value = customGateState.value[newSelection]
 }
-async function handleCustomGateCalculate() {
+async function calculateCustomGate() {
   // current implementation fails when points are perfectly parallel or opposite
   // todo: somehow fix this
   // todo: loading state on calculate button
@@ -134,13 +138,16 @@ function removeAxisCopies() {
   axesGuideRef.value.visible = false
   axesGuideRef.value.setRotationFromEuler(new Euler()) // reset rotation
 }
+function clearArcPoints() {
+  arcPoints.value = []
+}
 function fireGate(gate) {
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, gate)
   if (config.value.showAxesHelpers) {
     createAxisCopies()
   }
-  arcPoints.value = []
+  clearArcPoints()
   currentGate.value = gate
   return new Promise((resolve) =>
     setTimeout(() => {
@@ -182,6 +189,7 @@ function startCustomGateSequence() {
 }
 function fastForwardSequenceExecution() {
   currentGate.value = null
+  clearArcPoints()
   flags.value.simulating = false
   flags.value.skipSimulation = true
   qubitPosition.value = customGateResult.value.expectedEndVector
@@ -196,6 +204,27 @@ function executeSequence(sequence, onFinished) {
     currentSequenceIndex.value++
     executeSequence(sequence, onFinished)
   })
+}
+function fireCustomGate() {
+  if (config.value.showAxesHelpers) {
+    createAxisCopies()
+  }
+  clearArcPoints()
+  const gate = createGateFromPoints(
+    customGateState.value.startPosition,
+    customGateState.value.endPosition
+  )
+  currentGate.value = gate
+  setTimeout(() => {
+    currentGate.value = null
+    qubitPosition.value = customGateState.value.endPosition.clone()
+
+    setTimeout(() => {
+      if (currentGate.value === null) {
+        removeAxisCopies()
+      }
+    }, 500)
+  }, config.value.animationDuration * 1000)
 }
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
@@ -215,7 +244,6 @@ const rotationArc = computed(() => {
   const geometry = new BufferGeometry().setFromPoints(arcPoints.value)
   return new Line(geometry, material)
 })
-// for creating custom gates, highlights the qubit that is not currently being set
 const customGateStartLinePoints = computed(() => {
   if (
     page.value !== 'customGate' ||
@@ -366,9 +394,10 @@ onLoop(({ delta }) => {
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
       @page-switch="handlePageSwitch"
-      @state-select="handleCustomStateSelect"
-      @calculate="handleCustomGateCalculate"
+      @state-select="setCustomStateSelection"
+      @calculate="calculateCustomGate"
       @simulate-sequence="startCustomGateSequence"
+      @show-rotation="fireCustomGate"
       @skip-simulation="fastForwardSequenceExecution"
     />
   </div>

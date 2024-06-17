@@ -13,6 +13,7 @@ const emit = defineEmits([
   'calculate',
   'page-switch',
   'simulate-sequence',
+  'show-rotation',
   'skip-simulation'
 ])
 
@@ -59,6 +60,15 @@ function handleSimulateClick() {
         :disabled="props.flags.simulating || props.flags.calculating"
       >
         Calculate
+      </button>
+    </div>
+    <div class="span-2">
+      <button
+        class="custom-gate"
+        @click.passive="$emit('show-rotation')"
+        :disabled="props.flags.simulating || props.flags.calculating"
+      >
+        Show Rotation
       </button>
     </div>
     <div

@@ -23,6 +23,7 @@ import {
   add,
   det
 } from 'mathjs'
+import { Vector3 } from 'three'
 import { applyGate, calculateStatevector, calculateCoordinates, GATES } from './qubit'
 // this contains the precomputed sequences of h, t, and tdg gates with their so3 matrices
 // generated from a function in qiskit, see generate_basic_approximations_json.py
@@ -128,6 +129,18 @@ function convertSu2ToSo3(mat) {
     [-2 * a * b + 2 * c * d, a ** 2 - b ** 2 + c ** 2 - d ** 2, 2 * a * d + 2 * b * c],
     [2 * a * c + 2 * b * d, 2 * b * c - 2 * a * d, a ** 2 + b ** 2 - c ** 2 - d ** 2]
   ])
+}
+
+export function createGateFromPoints(from, to) {
+  const so3Matrix = computeSo3FromPoints(from, to)
+  const primaryAxis = new Vector3(...computeRotationAxis(so3Matrix))
+  const opposingAxis = primaryAxis.clone()
+  opposingAxis.multiplyScalar(-1)
+  const angle = from.angleTo(to)
+  return {
+    axis: [primaryAxis, opposingAxis],
+    rotation: angle
+  }
 }
 
 export function computeSo3FromPoints(from, to) {
