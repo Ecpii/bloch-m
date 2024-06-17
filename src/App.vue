@@ -215,6 +215,7 @@ function fireCustomGate() {
     customGateState.value.endPosition
   )
   currentGate.value = gate
+  qubitPosition.value = customGateState.value.startPosition.clone()
   setTimeout(() => {
     currentGate.value = null
     qubitPosition.value = customGateState.value.endPosition.clone()
@@ -245,25 +246,22 @@ const rotationArc = computed(() => {
   return new Line(geometry, material)
 })
 const customGateStartLinePoints = computed(() => {
-  if (
-    page.value !== 'customGate' ||
-    customGateState.value.startPosition.equals(qubitPosition.value) // prevent z-fighting
-  ) {
-    return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
+  const startPosition = customGateState.value.startPosition
+  if (page.value === 'customGate' && !qubitPosition.value.equals(startPosition)) {
+    return [new Vector3(0, 0, 0), startPosition]
   }
-  return [new Vector3(0, 0, 0), customGateState.value.startPosition]
+  return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
 })
 const customGateEndLinePoints = computed(() => {
-  if (
-    page.value !== 'customGate' ||
-    customGateState.value.endPosition.equals(qubitPosition.value) // prevent z-fighting
-  ) {
-    return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
+  const endPosition = customGateState.value.endPosition
+  if (page.value === 'customGate' && !qubitPosition.value.equals(endPosition)) {
+    return [new Vector3(0, 0, 0), endPosition]
   }
-  return [new Vector3(0, 0, 0), customGateState.value.endPosition]
+
+  return [new Vector3(0, 0, 0), new Vector3(0, 0, 0)]
 })
 const qubitLineColor = computed(() => {
-  if (page.value !== 'customGate' || flags.value.simulating) {
+  if (page.value !== 'customGate' || currentGate.value !== null || flags.value.simulating) {
     return COLORS.primary
   }
 
