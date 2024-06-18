@@ -54,7 +54,7 @@ const arcPoints = ref([])
 const flags = ref({
   simulating: false,
   calculating: false,
-  skipSimulation: false
+  stopGates: false
 })
 const { onLoop } = useRenderLoop()
 
@@ -81,12 +81,14 @@ function handleGate(gateName) {
   if (currentGate.value !== null) {
     return
   }
+  flags.value.stopGates = false
   fireGate(GATES[gateName])
 }
 function handleRotationGate(key, axis, angle) {
   if (currentGate.value !== null) {
     return
   }
+  flags.value.stopGates = false
   const newGate = GATES[key]
   newGate.matrix = generateRotationMatrix(axis, angle)
   newGate.rotation = angle
@@ -151,12 +153,13 @@ function fireGate(gate) {
   currentGate.value = gate
   return new Promise((resolve) =>
     setTimeout(() => {
-      if (flags.value.skipSimulation) {
+      currentGate.value = null
+
+      if (flags.value.stopGates) {
         resolve()
         return
       }
 
-      currentGate.value = null
       setQubitStatevector(endStatevector)
 
       setTimeout(() => {
@@ -173,7 +176,7 @@ function setQubitStatevector(newStatevector) {
 }
 function startCustomGateSequence() {
   flags.value.simulating = true
-  flags.value.skipSimulation = false
+  flags.value.stopGates = false
   const startPosition = customGateState.value.startPosition
   qubitPosition.value = startPosition.clone()
   currentSequenceIndex.value = 0
@@ -191,11 +194,11 @@ function fastForwardSequenceExecution() {
   currentGate.value = null
   clearArcPoints()
   flags.value.simulating = false
-  flags.value.skipSimulation = true
+  flags.value.stopGates = true
   qubitPosition.value = customGateResult.value.expectedEndVector
 }
 function executeSequence(sequence, onFinished) {
-  if (currentSequenceIndex.value >= sequence.length || flags.value.skipSimulation) {
+  if (currentSequenceIndex.value >= sequence.length || flags.value.stopGates) {
     onFinished()
     return
   }
