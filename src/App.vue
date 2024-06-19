@@ -152,7 +152,10 @@ function fireGateWithMatrix(gate) {
     setQubitStatevector(endStatevector)
   })
 }
-function fireCustomGate() {
+function previewCustomGate() {
+  if (currentGate.value !== null) {
+    return
+  }
   const gate = createGateFromPoints(
     customGateState.value.startPosition,
     customGateState.value.endPosition
@@ -394,7 +397,7 @@ onLoop(({ delta }) => {
       @state-select="setCustomStateSelection"
       @calculate="calculateCustomGate"
       @simulate-sequence="startCustomGateSequence"
-      @show-rotation="fireCustomGate"
+      @show-rotation="previewCustomGate"
       @skip-simulation="fastForwardSequenceExecution"
     />
   </div>
