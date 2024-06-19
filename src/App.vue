@@ -29,6 +29,7 @@ import AxesLabels from './components/AxesLabels.vue'
 import AnimationSettings from './components/AnimationSettings.vue'
 Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system since threejs is default y-up
 
+const MODE = import.meta.env.MODE
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
 const hoveredGate = shallowRef(null)
@@ -314,7 +315,7 @@ onLoop(({ delta }) => {
         :far="100"
         ref="cameraRef"
       />
-      <Stats />
+      <Stats v-if="MODE === 'development'" />
 
       <OrbitControls :enable-pan="false" />
 
@@ -425,7 +426,7 @@ onLoop(({ delta }) => {
   transform: translateY(-50%);
 }
 #gate-info-container {
-  width: calc((100vw - 700px) / 2);
+  width: calc((100vw - 800px) / 2);
   position: absolute;
   left: 1rem;
   top: 50%;

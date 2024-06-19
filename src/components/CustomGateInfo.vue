@@ -42,18 +42,20 @@ watchEffect(() => {
       <a href="https://en.wikipedia.org/wiki/Solovay%E2%80%93Kitaev_theorem" target="_blank"
         >Solovay–Kitaev theorem</a
       >
-      that an approximation like this can be found efficiently.
+      that this approximation can be found efficiently.
     </p>
     <p>
-      Using this tool, you can specify a rotation and calculate this approxiation via the
-      Solovay–Kitaev algorithm. The rotation specified by the two states is the rotation from |α⟩ to
-      |β⟩.
+      Using this tool, you can specify a rotation between two points and generate an approximation
+      for it through the Solovay-Kitaev algorithm.
     </p>
     <ol>
-      <li>Click on any point of the Bloch sphere to select |α⟩.</li>
+      <li>Click on any point of the Bloch sphere to select |α⟩ (start point of rotation).</li>
       <li>
         Click on the button labeled "Set |β⟩" and then click on any point of the Bloch sphere to
-        select |β⟩.
+        select |β⟩ (end point of rotation).
+      </li>
+      <li>
+        Click "Show Rotation" to show the gate defined by |α⟩ and |β⟩, and confirm it is as desired.
       </li>
       <li>Select desired recursion depth for the approximation, and click "Calculate".</li>
     </ol>
