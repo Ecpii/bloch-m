@@ -16,6 +16,7 @@
     "mathjs": "^12.4.2",
     "three": "^0.164.1",
     "three-spritetext": "^1.8.2",
+    "vite-svg-loader": "^5.1.0",
     "vue": "^3.4.21"
   },
   "devDependencies": {

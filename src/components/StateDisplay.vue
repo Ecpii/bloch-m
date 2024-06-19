@@ -1,21 +1,19 @@
 <script setup>
 import { statevectorToProbabilities } from '@/qubit'
 import { computed } from 'vue'
+import KatexDisplay from './KatexDisplay.vue'
 
 const props = defineProps(['statevector'])
 const qubit = computed(() => statevectorToProbabilities(props.statevector))
 
-function renderKatex() {
+const computedTex = computed(() => {
   const phaseInPi = qubit.value.phase / Math.PI
-  return katex.renderToString(
-    `|\\psi\\rangle = \\sqrt{${qubit.value.zeroProbability.toFixed(2)}} |0\\rangle +
-  \\sqrt{${qubit.value.oneProbability.toFixed(2)}} e^{${phaseInPi.toFixed(2)} \\pi i} |1\\rangle`,
-    { displayMode: true, output: 'html' }
-  )
-}
+  return `|\\psi\\rangle = \\sqrt{${qubit.value.zeroProbability.toFixed(2)}} |0\\rangle +
+  \\sqrt{${qubit.value.oneProbability.toFixed(2)}} e^{${phaseInPi.toFixed(2)} \\pi i} |1\\rangle`
+})
 </script>
 <template>
-  <div v-html="renderKatex()"></div>
+  <KatexDisplay :tex="computedTex" />
 </template>
 
 <style scoped>

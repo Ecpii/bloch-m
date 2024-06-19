@@ -8,6 +8,7 @@
   --purple: #a488af;
   --green: #a1be7e;
   --orange: #f1a04a;
+  --red: #e5645e;
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -26,6 +27,7 @@
   box-sizing: border-box;
   margin: 0;
   font-weight: normal;
+  scrollbar-color: var(--secondary) transparent;
 }
 
 body {

@@ -216,7 +216,7 @@ export const GATES = {
   'ry-': {
     axis: [new Vector3(0, 1, 0), new Vector3(0, -1, 0)],
     name: 'Ry (-θ) Gate',
-    description: 'Parameterized gate that rotates -θ radians around the y-axis.',
+    description: 'createQubitStatevectorTex',
     matrixTex: `Ry(\\theta) = \\begin{bmatrix}
     \\cos\\left(-\\frac{\\theta}{2}\\right) & -\\sin(-\\frac{\\theta}{2}) \\\\
     \\sin(-\\frac{\\theta}{2}) & \\cos(-\\frac{\\theta}{2})
@@ -257,6 +257,15 @@ export const GATES = {
       { state: '|0\\rangle', value: 'e^{\\theta/2i}' },
       { state: '|1\\rangle', value: 'e^{-\\theta/2i}' }
     ]
+  },
+  custom: {
+    name: 'Custom Gate',
+    description:
+      'Specify a custom gate through two points and a sequence of H and T gates will be used to approximate the rotation.'
+  },
+  standard: {
+    name: 'Standard Gates',
+    description: 'Return to the predefined gates.'
   }
 }
 export function statevectorToProbabilities(statevector) {
@@ -308,6 +317,7 @@ function normalizeStatevector(statevector) {
   /**
    * Returns statevector with real zero component and phase encoded on one component.
    * @param statevector math.matrix object of size 2.
+   * @return js array of size 2 [number, math.complex]
    */
   // convoluted way to get the first element because of mathjs
   const zero = subset(statevector, index(0))
@@ -338,4 +348,20 @@ export function generateRotationMatrix(axis, angle) {
       [0, exp(multiply(complex(0, 1), angle / 2))]
     ])
   }
+}
+
+export function createQubitStatevectorTex(qubitPosition, qubitName) {
+  const statevector = calculateStatevector(qubitPosition)
+  const { r: oneAmplitude, phi: phase } = statevector[1].toPolar()
+  const oneComponentTex =
+    oneAmplitude.toFixed(2) === '0.00'
+      ? '0.00'
+      : phase.toFixed(2) === '0.00'
+        ? oneAmplitude.toFixed(2)
+        : `${oneAmplitude.toFixed(2)}e^{${phase.toFixed(2)}i}`
+  return `|${qubitName}\\rangle =
+  \\begin{bmatrix}
+    ${statevector[0].toFixed(2)} \\\\ ${oneComponentTex}
+  \\end{bmatrix}
+  `
 }
