@@ -39,7 +39,7 @@ const config = ref({
 })
 const page = shallowRef('standard')
 const customGateState = ref({
-  startPosition: new Vector3(0, 0, 1),
+  startPosition: new Vector3(0, 1, 0),
   endPosition: new Vector3(1, 0, 0),
   selecting: 'startPosition',
   precision: 2
@@ -64,7 +64,7 @@ function handleTresPointerDown(intersection) {
     customGateState.value[customGateState.value.selecting] = intersection.point
   }
 }
-function setState(stateName) {
+function setQubitPosition(stateName) {
   if (stateName === '0') {
     qubitPosition.value = new Vector3(0, 0, 1)
   } else if (stateName === '1') {
@@ -77,11 +77,11 @@ function handleGateHover(gateName) {
 function handleGateUnhover() {
   hoveredGate.value = null
 }
-function handleGate(gateName) {
+function handleStandardGate(gateName) {
   if (currentGate.value !== null) {
     return
   }
-  fireGateWithSu2(GATES[gateName])
+  fireGateWithMatrix(GATES[gateName])
 }
 function handleRotationGate(key, axis, angle) {
   if (currentGate.value !== null) {
@@ -90,12 +90,16 @@ function handleRotationGate(key, axis, angle) {
   const newGate = GATES[key]
   newGate.matrix = generateRotationMatrix(axis, angle)
   newGate.rotation = angle
-  fireGateWithSu2(newGate)
+  fireGateWithMatrix(newGate)
 }
 function handlePageSwitch(newPage) {
   page.value = newPage
   if (newPage === 'customGate') {
-    qubitPosition.value = customGateState.value[customGateState.value.selecting].clone()
+    if (customGateState.value.selecting === 'endPosition') {
+      qubitPosition.value = customGateState.value.endPosition.clone()
+    } else {
+      qubitPosition.value = customGateState.value.startPosition.clone()
+    }
   }
 }
 function setCustomStateSelection(newSelection) {
@@ -141,7 +145,7 @@ function removeAxisCopies() {
 function clearArcPoints() {
   arcPoints.value = []
 }
-function fireGateWithSu2(gate) {
+function fireGateWithMatrix(gate) {
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, gate)
   return fireGate(gate, () => {
@@ -207,7 +211,7 @@ async function executeGateSequence(sequence, onFinished) {
     if (flags.value.stopGates) {
       break
     }
-    await fireGateWithSu2(sequence[sequenceIndex.value])
+    await fireGateWithMatrix(sequence[sequenceIndex.value])
   }
   onFinished()
 }
@@ -371,8 +375,8 @@ onLoop(({ delta }) => {
   <div id="controls-container">
     <GateControls
       v-if="page === 'standard'"
-      @set-state="setState"
-      @gate="handleGate"
+      @set-state="setQubitPosition"
+      @gate="handleStandardGate"
       @rotation-gate="handleRotationGate"
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
