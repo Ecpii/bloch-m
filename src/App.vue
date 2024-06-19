@@ -128,11 +128,12 @@ async function calculateCustomGate() {
     endPosition,
     customGateState.value.precision
   )
-  const expectedEndVector = solovayKitaev.apply(startPosition)
+  const expectedEndPosition = solovayKitaev.apply(startPosition)
   customGateResult.value = {
+    startPosition,
     originalSo3Matrix: so3Matrix,
     solovayKitaev,
-    expectedEndVector
+    expectedEndPosition
   }
   flags.value.calculating = false
 }
@@ -161,11 +162,11 @@ function previewCustomGate() {
     customGateState.value.startPosition,
     customGateState.value.endPosition
   )
-  const expectedEndVector = customGateState.value.endPosition.clone()
+  const expectedEndPosition = customGateState.value.endPosition.clone()
   // without this next line the line for alpha disappears - it "changes" qubitPosition to be not equal to startPosition
   qubitPosition.value = customGateState.value.startPosition.clone()
   fireGate(gate, () => {
-    qubitPosition.value = expectedEndVector
+    qubitPosition.value = expectedEndPosition
   })
 }
 function fireGate(gate, onFinished = () => {}) {
@@ -199,7 +200,7 @@ function setQubitStatevector(newStatevector) {
 function startCustomGateSequence() {
   flags.value.simulating = true
   flags.value.stopGates = false
-  qubitPosition.value = customGateState.value.startPosition.clone()
+  qubitPosition.value = customGateResult.value.startPosition.clone()
 
   const sequenceGates = customGateResult.value.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
@@ -207,7 +208,7 @@ function startCustomGateSequence() {
 
   executeGateSequence(sequenceGates, () => {
     flags.value.simulating = false
-    qubitPosition.value = customGateResult.value.expectedEndVector.clone()
+    qubitPosition.value = customGateResult.value.expectedEndPosition.clone()
   })
 }
 async function executeGateSequence(sequence, onFinished) {
@@ -222,7 +223,7 @@ async function executeGateSequence(sequence, onFinished) {
 function fastForwardSequenceExecution() {
   interruptGates()
   flags.value.simulating = false
-  qubitPosition.value = customGateResult.value.expectedEndVector.clone()
+  qubitPosition.value = customGateResult.value.expectedEndPosition.clone()
 }
 function interruptGates() {
   currentGate.value = null
