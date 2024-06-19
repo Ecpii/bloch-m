@@ -191,8 +191,7 @@ function setQubitStatevector(newStatevector) {
 function startCustomGateSequence() {
   flags.value.simulating = true
   flags.value.stopGates = false
-  const startPosition = customGateState.value.startPosition
-  qubitPosition.value = startPosition.clone()
+  qubitPosition.value = customGateState.value.startPosition.clone()
 
   const sequenceGates = customGateResult.value.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
@@ -204,11 +203,6 @@ function startCustomGateSequence() {
   })
 }
 async function executeGateSequence(sequence, onFinished) {
-  if (sequenceIndex.value >= sequence.length || flags.value.stopGates) {
-    onFinished()
-    return
-  }
-
   for (sequenceIndex.value = 0; sequenceIndex.value < sequence.length; sequenceIndex.value++) {
     if (flags.value.stopGates) {
       break
