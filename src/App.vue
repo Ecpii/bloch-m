@@ -46,7 +46,7 @@ const customGateState = ref({
 })
 const customGateResult = ref()
 
-const currentSequenceIndex = ref(0)
+const sequenceIndex = ref(0)
 const axesGuideRef = shallowRef(null) // ref to the TresGroup that shows a copy of the axes on every rotation
 const sphereRef = shallowRef(null) // ref to the bloch sphere
 const pointRef = shallowRef(null) // point on end of the qubit line
@@ -193,38 +193,40 @@ function startCustomGateSequence() {
   flags.value.stopGates = false
   const startPosition = customGateState.value.startPosition
   qubitPosition.value = startPosition.clone()
-  currentSequenceIndex.value = 0
 
   const sequenceGates = customGateResult.value.solovayKitaev.gates.map(
     (gateName) => GATES[gateName]
   )
 
-  executeSequence(sequenceGates, () => {
+  executeGateSequence(sequenceGates, () => {
     flags.value.simulating = false
     qubitPosition.value = customGateResult.value.expectedEndVector.clone()
   })
 }
-function interruptGates() {
-  currentGate.value = null
-  flags.value.stopGates = true
-  clearArcPoints()
-  removeAxisCopies()
+async function executeGateSequence(sequence, onFinished) {
+  if (sequenceIndex.value >= sequence.length || flags.value.stopGates) {
+    onFinished()
+    return
+  }
+
+  for (sequenceIndex.value = 0; sequenceIndex.value < sequence.length; sequenceIndex.value++) {
+    if (flags.value.stopGates) {
+      break
+    }
+    await fireGateWithSu2(sequence[sequenceIndex.value])
+  }
+  onFinished()
 }
 function fastForwardSequenceExecution() {
   interruptGates()
   flags.value.simulating = false
   qubitPosition.value = customGateResult.value.expectedEndVector.clone()
 }
-function executeSequence(sequence, onFinished) {
-  if (currentSequenceIndex.value >= sequence.length || flags.value.stopGates) {
-    onFinished()
-    return
-  }
-
-  fireGateWithSu2(sequence[currentSequenceIndex.value]).then(() => {
-    currentSequenceIndex.value++
-    executeSequence(sequence, onFinished)
-  })
+function interruptGates() {
+  currentGate.value = null
+  flags.value.stopGates = true
+  clearArcPoints()
+  removeAxisCopies()
 }
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
@@ -386,7 +388,7 @@ onLoop(({ delta }) => {
       v-else
       v-model="customGateState"
       :flags
-      :sequence-index="currentSequenceIndex"
+      :sequence-index="sequenceIndex"
       :result="customGateResult"
       @gate-hover="handleGateHover"
       @gate-unhover="handleGateUnhover"
@@ -400,12 +402,7 @@ onLoop(({ delta }) => {
   </div>
   <div id="gate-info-container">
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
-    <CustomGateInfo
-      :result="customGateResult"
-      :sequence-index="currentSequenceIndex"
-      :flags
-      v-else
-    />
+    <CustomGateInfo :result="customGateResult" :sequence-index="sequenceIndex" :flags v-else />
   </div>
   <div id="animation-settings">
     <AnimationSettings :disabled="currentGate !== null" v-model="config" />
