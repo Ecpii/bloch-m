@@ -69,6 +69,7 @@ function handleSimulateClick() {
         :disabled="props.flags.simulating || props.flags.calculating"
       >
         Show Rotation
+        <!-- todo: disable when gate -->
       </button>
     </div>
     <div

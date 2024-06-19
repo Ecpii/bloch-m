@@ -81,18 +81,16 @@ function handleGate(gateName) {
   if (currentGate.value !== null) {
     return
   }
-  flags.value.stopGates = false
-  fireGate(GATES[gateName])
+  fireGateWithSu2(GATES[gateName])
 }
 function handleRotationGate(key, axis, angle) {
   if (currentGate.value !== null) {
     return
   }
-  flags.value.stopGates = false
   const newGate = GATES[key]
   newGate.matrix = generateRotationMatrix(axis, angle)
   newGate.rotation = angle
-  fireGate(newGate)
+  fireGateWithSu2(newGate)
 }
 function handlePageSwitch(newPage) {
   page.value = newPage
@@ -107,7 +105,7 @@ function setCustomStateSelection(newSelection) {
 async function calculateCustomGate() {
   // current implementation fails when points are perfectly parallel or opposite
   // todo: somehow fix this
-  // todo: loading state on calculate button
+  // todo: make this function truly async, still stalls page
   const startPosition = customGateState.value.startPosition
   const endPosition = customGateState.value.endPosition
   const invalidPoints = checkPoints(startPosition, endPosition)
@@ -143,9 +141,27 @@ function removeAxisCopies() {
 function clearArcPoints() {
   arcPoints.value = []
 }
-function fireGate(gate) {
+function fireGateWithSu2(gate) {
   const originalStatevector = qubitStatevector.value
   const endStatevector = applyGate(originalStatevector, gate)
+  return fireGate(gate, () => {
+    setQubitStatevector(endStatevector)
+  })
+}
+function fireCustomGate() {
+  const gate = createGateFromPoints(
+    customGateState.value.startPosition,
+    customGateState.value.endPosition
+  )
+  const expectedEndVector = customGateState.value.endPosition.clone()
+  // without this next line the line for alpha disappears - it "changes" qubitPosition to be not equal to startPosition
+  qubitPosition.value = customGateState.value.startPosition.clone()
+  fireGate(gate, () => {
+    qubitPosition.value = expectedEndVector
+  })
+}
+function fireGate(gate, onFinished = () => {}) {
+  flags.value.stopGates = false
   if (config.value.showAxesHelpers) {
     createAxisCopies()
   }
@@ -153,15 +169,13 @@ function fireGate(gate) {
   currentGate.value = gate
   return new Promise((resolve) =>
     setTimeout(() => {
-      currentGate.value = null
-
       if (flags.value.stopGates) {
         resolve()
         return
       }
 
-      setQubitStatevector(endStatevector)
-
+      currentGate.value = null
+      onFinished()
       setTimeout(() => {
         if (currentGate.value === null) {
           removeAxisCopies()
@@ -187,15 +201,19 @@ function startCustomGateSequence() {
 
   executeSequence(sequenceGates, () => {
     flags.value.simulating = false
-    qubitPosition.value = customGateResult.value.expectedEndVector
+    qubitPosition.value = customGateResult.value.expectedEndVector.clone()
   })
 }
-function fastForwardSequenceExecution() {
+function interruptGates() {
   currentGate.value = null
-  clearArcPoints()
-  flags.value.simulating = false
   flags.value.stopGates = true
-  qubitPosition.value = customGateResult.value.expectedEndVector
+  clearArcPoints()
+  removeAxisCopies()
+}
+function fastForwardSequenceExecution() {
+  interruptGates()
+  flags.value.simulating = false
+  qubitPosition.value = customGateResult.value.expectedEndVector.clone()
 }
 function executeSequence(sequence, onFinished) {
   if (currentSequenceIndex.value >= sequence.length || flags.value.stopGates) {
@@ -203,32 +221,10 @@ function executeSequence(sequence, onFinished) {
     return
   }
 
-  fireGate(sequence[currentSequenceIndex.value]).then(() => {
+  fireGateWithSu2(sequence[currentSequenceIndex.value]).then(() => {
     currentSequenceIndex.value++
     executeSequence(sequence, onFinished)
   })
-}
-function fireCustomGate() {
-  if (config.value.showAxesHelpers) {
-    createAxisCopies()
-  }
-  clearArcPoints()
-  const gate = createGateFromPoints(
-    customGateState.value.startPosition,
-    customGateState.value.endPosition
-  )
-  currentGate.value = gate
-  qubitPosition.value = customGateState.value.startPosition.clone()
-  setTimeout(() => {
-    currentGate.value = null
-    qubitPosition.value = customGateState.value.endPosition.clone()
-
-    setTimeout(() => {
-      if (currentGate.value === null) {
-        removeAxisCopies()
-      }
-    }, 500)
-  }, config.value.animationDuration * 1000)
 }
 
 const qubitStatevector = computed(() => calculateStatevector(qubitPosition.value))
