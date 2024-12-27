@@ -1,6 +1,6 @@
-# bloch-m
+# Bloch M
 
-A Bloch sphere visualization tool, inspired by [James Weaver's grok-bloch](https://github.com/JavaFXpert/grok-bloch/).
+An animated Bloch sphere visualization tool, inspired by [James Weaver's grok-bloch](https://github.com/JavaFXpert/grok-bloch/). Made for EECS 479!
 
 View online [here](https://ecpii.github.io/bloch-m/), or clone and run
 
