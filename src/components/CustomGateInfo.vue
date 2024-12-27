@@ -37,12 +37,18 @@ watchEffect(() => {
   <template v-if="!props.result">
     <h1>Custom Gate</h1>
     <p>
-      Any rotation on the Bloch sphere can be approximated with just the H, T, and T<sup>†</sup>
-      gates. It was proven in the
+      <b>
+        Warning: this tool may not work correctly.
+        <a href="https://github.com/Ecpii/bloch-m/issues/6">View issue</a>
+      </b>
+    </p>
+    <p>
+      By the
       <a href="https://en.wikipedia.org/wiki/Solovay%E2%80%93Kitaev_theorem" target="_blank"
         >Solovay–Kitaev theorem</a
-      >
-      that this approximation can be found efficiently.
+      >, any rotation on the Bloch sphere can be efficiently approximated with just the H, T, and
+      T<sup>†</sup>
+      gates.
     </p>
     <p>
       Using this tool, you can specify a rotation between two points and generate an approximation
