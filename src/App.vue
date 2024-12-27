@@ -318,7 +318,7 @@ onLoop(({ delta }) => {
       />
       <Stats v-if="MODE === 'development'" />
 
-      <OrbitControls :enable-pan="false" />
+      <OrbitControls :enable-pan="false" :enable-zoom="false" />
 
       <AxesLines />
       <AxesLabels />
