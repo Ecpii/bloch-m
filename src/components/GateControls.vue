@@ -1,15 +1,16 @@
 <script setup>
+import GateButton from './GateButton.vue'
 import { shallowRef } from 'vue'
 defineEmits(['set-state', 'gate', 'gate-hover', 'gate-unhover', 'rotation-gate', 'page-switch'])
 const GATE_BUTTONS = [
-  { key: 'x', class: 'pauli', labelHTML: 'X' },
-  { key: 's', class: 's', labelHTML: 'S' },
-  { key: 'y', class: 'pauli', labelHTML: 'Y' },
-  { key: 'sdg', class: 's', labelHTML: 'S<sup>†</sup>' },
-  { key: 'z', class: 'pauli', labelHTML: 'Z' },
-  { key: 't', class: 't', labelHTML: 'T' },
-  { key: 'h', class: 'h', labelHTML: 'H' },
-  { key: 'tdg', class: 't', labelHTML: 'T<sup>†</sup>' }
+  'x',
+  's',
+  'y',
+  'sdg',
+  'z',
+  't',
+  'h',
+  'tdg'
 ]
 const ROTATION_GATE_BUTTONS = [
   { key: 'rx+', axis: 'x', angle: '+θ', isPositive: true },
@@ -38,14 +39,8 @@ function getAngle(fraction, isPositive) {
   <div id="controls" @mouseleave="$emit('gate-unhover')">
     <button class="reset" @click="$emit('set-state', '0')">|0⟩</button>
     <button class="reset" @click="$emit('set-state', '1')">|1⟩</button>
-    <button
-      v-for="gate in GATE_BUTTONS"
-      :class="gate.class"
-      :key="gate.key"
-      @click="$emit('gate', gate.key)"
-      @mouseover="$emit('gate-hover', gate.key)"
-      v-html="gate.labelHTML"
-    />
+    <GateButton :gate-key="gate" :key="gate" v-for="gate in GATE_BUTTONS" @gate="(arg) => $emit('gate', arg)"
+      @gate-hover="(arg) => $emit('gate-hover', arg)" />
     <div class="span-2" id="select-theta">
       <hr />
       θ =
@@ -56,49 +51,21 @@ function getAngle(fraction, isPositive) {
         <option value="pi/12">π/12</option>
       </select>
     </div>
-    <button
-      v-for="gate in ROTATION_GATE_BUTTONS"
-      class="rotation"
-      :key="gate.key"
+    <!-- <button v-for="gate in ROTATION_GATE_BUTTONS" class="rotation" :key="gate.key"
       @click="$emit('rotation-gate', gate.key, gate.axis, getAngle(theta, gate.isPositive))"
-      @mouseover="$emit('gate-hover', gate.key)"
-    >
+      @mouseover="$emit('gate-hover', gate.key)">
       <div>R{{ gate.axis }}</div>
       <span style="font-size: 1rem">{{ gate.angle }}</span>
-    </button>
+    </button> -->
     <div class="span-2">
       <hr />
-      <button
-        class="custom-gate"
-        @click="$emit('page-switch', 'customGate')"
-        @mouseover="$emit('gate-hover', 'custom')"
-      >
+      <button class="custom-gate" @click="$emit('page-switch', 'customGate')"
+        @mouseover="$emit('gate-hover', 'custom')">
         Custom Gate
       </button>
     </div>
   </div>
 </template>
-
 <style scoped>
 @import '../assets/controls.css';
-button.pauli {
-  background: var(--primary);
-}
-button.h {
-  background: var(--accent);
-}
-button.s {
-  background: var(--purple);
-}
-button.t {
-  background: var(--green);
-}
-button.rotation {
-  background: var(--orange);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
 </style>
