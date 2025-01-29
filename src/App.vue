@@ -71,6 +71,7 @@ function setQubitPosition(stateName) {
   } else if (stateName === '1') {
     qubitPosition.value = new Vector3(0, 0, -1)
   }
+  interruptGates()
 }
 function handleGateHover(gateName) {
   hoveredGate.value = GATES[gateName]
@@ -169,7 +170,7 @@ function previewCustomGate() {
     qubitPosition.value = expectedEndPosition
   })
 }
-function fireGate(gate, onFinished = () => {}) {
+function fireGate(gate, onFinished = () => { }) {
   flags.value.stopGates = false
   if (config.value.showAxesHelpers) {
     createAxisCopies()
@@ -308,14 +309,8 @@ onLoop(({ delta }) => {
 <template>
   <div id="tres-canvas">
     <TresCanvas :alpha="true">
-      <TresPerspectiveCamera
-        :up="[0, 0, 1]"
-        :position="[4, 1, 1]"
-        :look-at="[0, 0, 0]"
-        :near="0.1"
-        :far="100"
-        ref="cameraRef"
-      />
+      <TresPerspectiveCamera :up="[0, 0, 1]" :position="[4, 1, 1]" :look-at="[0, 0, 0]" :near="0.1" :far="100"
+        ref="cameraRef" />
       <Stats v-if="MODE === 'development'" />
 
       <OrbitControls :enable-pan="false" :enable-zoom="false" />
@@ -325,30 +320,18 @@ onLoop(({ delta }) => {
 
       <TresGroup ref="axesGuideRef" :up="[0, 0, 1]" :visible="false">
         <!-- <TresAxesHelper /> -->
-        <Line2
-          :points="[
-            [0, 0, -1],
-            [0, 0, 1]
-          ]"
-          :color="COLORS.secondary"
-          :line-width="3"
-        />
-        <Line2
-          :points="[
-            [0, -1, 0],
-            [0, 1, 0]
-          ]"
-          :color="COLORS.secondary"
-          :line-width="3"
-        />
-        <Line2
-          :points="[
-            [-1, 0, 0],
-            [1, 0, 0]
-          ]"
-          :color="COLORS.secondary"
-          :line-width="3"
-        />
+        <Line2 :points="[
+          [0, 0, -1],
+          [0, 0, 1]
+        ]" :color="COLORS.secondary" :line-width="3" />
+        <Line2 :points="[
+          [0, -1, 0],
+          [0, 1, 0]
+        ]" :color="COLORS.secondary" :line-width="3" />
+        <Line2 :points="[
+          [-1, 0, 0],
+          [1, 0, 0]
+        ]" :color="COLORS.secondary" :line-width="3" />
       </TresGroup>
 
       <primitive :object="rotationArc" />
@@ -378,30 +361,14 @@ onLoop(({ delta }) => {
     <StateDisplay :statevector="qubitStatevector" />
   </div>
   <div id="controls-container">
-    <GateControls
-      v-if="page === 'standard'"
-      @set-state="setQubitPosition"
-      @gate="handleStandardGate"
-      @rotation-gate="handleRotationGate"
-      @gate-hover="handleGateHover"
-      @gate-unhover="handleGateUnhover"
-      @page-switch="handlePageSwitch"
-    />
-    <CustomGateControls
-      v-else
-      v-model="customGateState"
-      :flags
-      :sequence-index="sequenceIndex"
-      :result="customGateResult"
-      @gate-hover="handleGateHover"
-      @gate-unhover="handleGateUnhover"
-      @page-switch="handlePageSwitch"
-      @state-select="setCustomStateSelection"
-      @calculate="calculateCustomGate"
-      @simulate-sequence="startCustomGateSequence"
-      @show-rotation="previewCustomGate"
-      @skip-simulation="fastForwardSequenceExecution"
-    />
+    <GateControls v-if="page === 'standard'" @set-state="setQubitPosition" @gate="handleStandardGate"
+      @rotation-gate="handleRotationGate" @gate-hover="handleGateHover" @gate-unhover="handleGateUnhover"
+      @page-switch="handlePageSwitch" />
+    <CustomGateControls v-else v-model="customGateState" :flags :sequence-index="sequenceIndex"
+      :result="customGateResult" @gate-hover="handleGateHover" @gate-unhover="handleGateUnhover"
+      @page-switch="handlePageSwitch" @state-select="setCustomStateSelection" @calculate="calculateCustomGate"
+      @simulate-sequence="startCustomGateSequence" @show-rotation="previewCustomGate"
+      @skip-simulation="fastForwardSequenceExecution" />
   </div>
   <div id="gate-info-container">
     <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
@@ -419,6 +386,7 @@ onLoop(({ delta }) => {
   bottom: 1rem;
   z-index: 10;
 }
+
 #controls-container {
   position: absolute;
   right: 1rem;
@@ -426,6 +394,7 @@ onLoop(({ delta }) => {
   z-index: 10;
   transform: translateY(-50%);
 }
+
 #gate-info-container {
   width: calc((100vw - 800px) / 2);
   position: absolute;
@@ -434,32 +403,38 @@ onLoop(({ delta }) => {
   z-index: 10;
   transform: translateY(-50%);
 }
+
 #state-display-container {
   position: absolute;
   top: 1rem;
   left: 50%;
   transform: translateX(-50%);
 }
+
 #tres-canvas {
   width: 100%;
   height: 100vh;
   z-index: 0;
 }
+
 @media (width < 1100px) {
   #tres-canvas {
     height: max(calc(650px + 2 * 2rem), 50vh);
   }
+
   #controls-container {
     position: static;
     float: inline-end;
     transform: none;
   }
+
   #gate-info-container {
     position: static;
     transform: none;
     width: calc(100% - 2rem);
     padding: 1rem;
   }
+
   #animation-settings {
     position: static;
     width: calc(100% - 2rem);
