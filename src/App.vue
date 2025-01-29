@@ -60,10 +60,14 @@ const flags = ref({
 const { onLoop } = useRenderLoop()
 
 function handleTresPointerDown(intersection) {
+  // if (currentGate.value) {
+  //   return;
+  // }
   qubitPosition.value = intersection.point
   if (page.value === 'customGate') {
     customGateState.value[customGateState.value.selecting] = intersection.point
   }
+  interruptGates()
 }
 function setQubitPosition(stateName) {
   if (stateName === '0') {
