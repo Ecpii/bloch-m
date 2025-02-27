@@ -134,7 +134,7 @@ export const GATES = {
     rotation: Math.PI / 4,
     name: 'T Gate',
     description: 'Adds π/4 phase to a qubit. The square root of the S gate.',
-    matrixTex: `S = \\begin{bmatrix} 1 & 0  \\\\ 0 & e^{\\frac{\\pi i}{4}} \\end{bmatrix}`,
+    matrixTex: `T = \\begin{bmatrix} 1 & 0  \\\\ 0 & e^{\\frac{\\pi i}{4}} \\end{bmatrix}`,
     eigenstates: [
       { state: '|0\\rangle', value: '+1' },
       { state: '|1\\rangle', value: 'e^{\\frac{\\pi i}{4}}' }
