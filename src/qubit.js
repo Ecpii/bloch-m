@@ -89,8 +89,8 @@ export const GATES = {
       'Switches the X and Z axes, turning phaseflips into bitflips. For example: HXH = Z and HZH = X.',
     matrixTex: `H = \\frac{1}{\\sqrt{2}} \\begin{bmatrix} 1 & 1 \\\\ 1 & -1 \\end{bmatrix}`,
     eigenstates: [
-      { state: '(1 + \\sqrt{2})|0\\rangle + |1\\rangle', value: '+1' },
-      { state: '(1 - \\sqrt{2})|0\\rangle + |1\\rangle', value: '-1' }
+      { state: '\\sqrt{0.85}|0\\rangle + \\sqrt{0.15} |1\\rangle', value: '+1' },
+      { state: '\\sqrt{0.15}|0\\rangle - \\sqrt{0.85} |1\\rangle', value: '-1' }
     ]
   },
   s: {
@@ -103,7 +103,7 @@ export const GATES = {
     name: 'S Gate',
     description:
       'Adds π/2 phase to a qubit. The square root of the Z gate, and the square of the T gate.',
-    matrixTex: `S = \\begin{bmatrix} 1 & 0  \\\\ 0 & i \\end{bmatrix}`,
+    matrixTex: `S = \\begin{bmatrix} 1 & 0 \\\\ 0 & i \\end{bmatrix}`,
     eigenstates: [
       { state: '|0\\rangle', value: '+1' },
       { state: '|1\\rangle', value: '+i' }
@@ -119,7 +119,7 @@ export const GATES = {
     name: 'S† Gate',
     description:
       'Subtracts π/2 phase from a qubit. The inverse (and conjugate transpose) of the S gate.',
-    matrixTex: `S^\\dagger = \\begin{bmatrix} 1 & 0  \\\\ 0 & -i \\end{bmatrix}`,
+    matrixTex: `S^\\dagger = \\begin{bmatrix} 1 & 0 \\\\ 0 & -i \\end{bmatrix}`,
     eigenstates: [
       { state: '|0\\rangle', value: '+1' },
       { state: '|1\\rangle', value: '-i' }
@@ -134,7 +134,7 @@ export const GATES = {
     rotation: Math.PI / 4,
     name: 'T Gate',
     description: 'Adds π/4 phase to a qubit. The square root of the S gate.',
-    matrixTex: `T = \\begin{bmatrix} 1 & 0  \\\\ 0 & e^{\\frac{\\pi i}{4}} \\end{bmatrix}`,
+    matrixTex: `T = \\begin{bmatrix} 1 & 0 \\\\ 0 & e^{\\frac{\\pi i}{4}} \\end{bmatrix}`,
     eigenstates: [
       { state: '|0\\rangle', value: '+1' },
       { state: '|1\\rangle', value: 'e^{\\frac{\\pi i}{4}}' }
@@ -150,7 +150,7 @@ export const GATES = {
     name: 'T† Gate',
     description:
       'Subtracts π/4 phase from a qubit. The inverse (and conjugate transpose) of the T gate.',
-    matrixTex: `T^\\dagger = \\begin{bmatrix} 1 & 0  \\\\ 0 & e^{\\frac{-\\pi i}{4}} \\end{bmatrix}`,
+    matrixTex: `T^\\dagger = \\begin{bmatrix} 1 & 0 \\\\ 0 & e^{\\frac{-\\pi i}{4}} \\end{bmatrix}`,
     eigenstates: [
       { state: '|0\\rangle', value: '+1' },
       { state: '|1\\rangle', value: 'e^{\\frac{-\\pi i}{4}}' }
