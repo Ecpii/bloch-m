@@ -10,15 +10,15 @@ const GATE_BUTTONS = [
   'z',
   't',
   'h',
-  'tdg'
+  'tdg',
 ]
-const ROTATION_GATE_BUTTONS = [
-  { key: 'rx+', axis: 'x', angle: '+θ', isPositive: true },
-  { key: 'rx-', axis: 'x', angle: '-θ', isPositive: false },
-  { key: 'ry+', axis: 'y', angle: '+θ', isPositive: true },
-  { key: 'ry-', axis: 'y', angle: '-θ', isPositive: false },
-  { key: 'rz+', axis: 'z', angle: '+θ', isPositive: true },
-  { key: 'rz-', axis: 'z', angle: '-θ', isPositive: false }
+const ROTATION_GATES = [
+  'rx+',
+  'rx-',
+  'ry+',
+  'ry-',
+  'rz+',
+  'rz-',
 ]
 const FRACTION_VALUES = {
   'pi/2': Math.PI / 2,
@@ -51,6 +51,8 @@ function getAngle(fraction, isPositive) {
         <option value="pi/12">π/12</option>
       </select>
     </div>
+    <GateButton :gate-key="gate" :key="gate" v-for="gate in ROTATION_GATES" @gate="(arg) => $emit('gate', arg)"
+      @gate-hover="(arg) => $emit('gate-hover', arg)" />
     <!-- <button v-for="gate in ROTATION_GATE_BUTTONS" class="rotation" :key="gate.key"
       @click="$emit('rotation-gate', gate.key, gate.axis, getAngle(theta, gate.isPositive))"
       @mouseover="$emit('gate-hover', gate.key)">

@@ -11,15 +11,13 @@ const GATE_BUTTONS = {
   'z': { key: 'z', class: 'pauli', labelHTML: 'Z' },
   't': { key: 't', class: 't', labelHTML: 'T' },
   'h': { key: 'h', class: 'h', labelHTML: 'H' },
-  'tdg': { key: 'tdg', class: 't', labelHTML: 'T<sup>†</sup>' }
-}
-const ROTATION_GATE_BUTTONS = {
-  'rx+': { key: 'rx+', axis: 'x', angle: '+θ', isPositive: true },
-  'rx-': { key: 'rx-', axis: 'x', angle: '-θ', isPositive: false },
-  'ry+': { key: 'ry+', axis: 'y', angle: '+θ', isPositive: true },
-  'ry-': { key: 'ry-', axis: 'y', angle: '-θ', isPositive: false },
-  'rz+': { key: 'rz+', axis: 'z', angle: '+θ', isPositive: true },
-  'rz-': { key: 'rz-', axis: 'z', angle: '-θ', isPositive: false }
+  'tdg': { key: 'tdg', class: 't', labelHTML: 'T<sup>†</sup>' },
+  'rx+': { key: 'rx+', class: 'rotation', labelHTML: '<div>Rx</div><span>+θ</span>', isPositive: true },
+  'rx-': { key: 'rx+', class: 'rotation', labelHTML: '<div>Rx</div><span>-θ</span>', isPositive: false },
+  'ry+': { key: 'rx+', class: 'rotation', labelHTML: '<div>Ry</div><span>+θ</span>', isPositive: true },
+  'ry-': { key: 'rx+', class: 'rotation', labelHTML: '<div>Ry</div><span>-θ</span>', isPositive: false },
+  'rz+': { key: 'rx+', class: 'rotation', labelHTML: '<div>Rz</div><span>+θ</span>', isPositive: true },
+  'rz-': { key: 'rx+', class: 'rotation', labelHTML: '<div>Rz</div><span>-θ</span>', isPositive: false },
 }
 
 const gate = computed(() => GATE_BUTTONS[props.gateKey])
@@ -30,7 +28,7 @@ const gate = computed(() => GATE_BUTTONS[props.gateKey])
     @mouseover="$emit('gate-hover', props.gateKey)" />
 </template>
 
-<style scoped>
+<style>
 @import '../assets/controls.css';
 
 button.pauli {
@@ -56,5 +54,9 @@ button.rotation {
   align-items: center;
   justify-content: center;
   height: 100%;
+}
+
+button.rotation span {
+  font-size: 1rem;
 }
 </style>
