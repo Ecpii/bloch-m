@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, shallowRef, triggerRef } from 'vue'
+import { computed, onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
 import { TresCanvas, useRenderLoop } from '@tresjs/core'
 import { Line2, OrbitControls, Stats } from '@tresjs/cientos'
 import { Vector3, BufferGeometry, Line, LineBasicMaterial, Object3D, Euler } from 'three'
@@ -30,6 +30,8 @@ import AnimationSettings from './components/AnimationSettings.vue'
 Object3D.DEFAULT_UP = new Vector3(0, 0, 1) // change to z-up system since threejs is default y-up
 
 const MODE = import.meta.env.MODE
+const LOCALSTORAGE_CONFIG_KEY = 'bloch-m-configuration'
+
 const qubitPosition = shallowRef(new Vector3(0, 0, 1))
 const currentGate = shallowRef(null)
 const hoveredGate = shallowRef(null)
@@ -58,6 +60,20 @@ const flags = ref({
   stopGates: false
 })
 const { onLoop } = useRenderLoop()
+
+onMounted(() => {
+  const storedConfig = localStorage.getItem(LOCALSTORAGE_CONFIG_KEY)
+  if (storedConfig) {
+    config.value = JSON.parse(storedConfig)
+  }
+})
+watch(
+  config,
+  (newConfig) => {
+    localStorage.setItem(LOCALSTORAGE_CONFIG_KEY, JSON.stringify(newConfig))
+  },
+  { deep: true }
+)
 
 function handleTresPointerDown(intersection) {
   // if (currentGate.value) {
