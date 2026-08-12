@@ -38,14 +38,8 @@ function getAngle(fraction, isPositive) {
   <div id="controls" @mouseleave="$emit('gate-unhover')">
     <button class="reset" @click="$emit('set-state', '0')">|0⟩</button>
     <button class="reset" @click="$emit('set-state', '1')">|1⟩</button>
-    <button
-      v-for="gate in GATE_BUTTONS"
-      :class="gate.class"
-      :key="gate.key"
-      @click="$emit('gate', gate.key)"
-      @mouseover="$emit('gate-hover', gate.key)"
-      v-html="gate.labelHTML"
-    />
+    <button v-for="gate in GATE_BUTTONS" :class="gate.class" :key="gate.key" @click="$emit('gate', gate.key)"
+      @mouseover="$emit('gate-hover', gate.key)" v-html="gate.labelHTML" />
     <div class="span-2" id="select-theta">
       <hr />
       θ =
@@ -56,17 +50,13 @@ function getAngle(fraction, isPositive) {
         <option value="pi/12">π/12</option>
       </select>
     </div>
-    <button
-      v-for="gate in ROTATION_GATE_BUTTONS"
-      class="rotation"
-      :key="gate.key"
+    <button v-for="gate in ROTATION_GATE_BUTTONS" class="rotation" :key="gate.key"
       @click="$emit('rotation-gate', gate.key, gate.axis, getAngle(theta, gate.isPositive))"
-      @mouseover="$emit('gate-hover', gate.key)"
-    >
+      @mouseover="$emit('gate-hover', gate.key)">
       <div>R{{ gate.axis }}</div>
       <span style="font-size: 1rem">{{ gate.angle }}</span>
     </button>
-    <div class="span-2">
+    <!-- <div class="span-2">
       <hr />
       <button
         class="custom-gate"
@@ -75,24 +65,29 @@ function getAngle(fraction, isPositive) {
       >
         Custom Gate
       </button>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <style scoped>
 @import '../assets/controls.css';
+
 button.pauli {
   background: var(--primary);
 }
+
 button.h {
   background: var(--accent);
 }
+
 button.s {
   background: var(--purple);
 }
+
 button.t {
   background: var(--green);
 }
+
 button.rotation {
   background: var(--orange);
   display: flex;

@@ -93,11 +93,14 @@ function setQubitPosition(stateName) {
   }
   interruptGates()
 }
+function handleGateUnselect() {
+  hoveredGate.value = null
+}
 function handleGateHover(gateName) {
   hoveredGate.value = GATES[gateName]
 }
 function handleGateUnhover() {
-  hoveredGate.value = null
+  // hoveredGate.value = null
 }
 function handleStandardGate(gateName) {
   if (currentGate.value !== null) {
@@ -391,7 +394,7 @@ onLoop(({ delta }) => {
       @skip-simulation="fastForwardSequenceExecution" />
   </div>
   <div id="gate-info-container">
-    <GateInfo :gate="hoveredGate" v-if="page === 'standard'" />
+    <GateInfo @gate-unselect="handleGateUnselect" :gate="hoveredGate" v-if="page === 'standard'" />
     <CustomGateInfo :result="customGateResult" :sequence-index="sequenceIndex" :flags v-else />
   </div>
   <div id="animation-settings">
